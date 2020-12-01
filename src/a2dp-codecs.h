@@ -27,6 +27,9 @@
 #ifndef BLUEALSA_A2DPCODECS_H_
 #define BLUEALSA_A2DPCODECS_H_
 
+#define FHG_USAC_IN_A2DP
+#define FHG_HEAAC_IN_A2DP
+
 #include <endian.h>
 #include <stdint.h>
 
@@ -36,6 +39,9 @@
 #define A2DP_CODEC_MPEG12   0x01
 #define A2DP_CODEC_MPEG24   0x02
 #define A2DP_CODEC_ATRAC    0x04
+#ifdef FHG_USAC_IN_A2DP
+#define A2DP_CODEC_MPEGD    0x08
+#endif
 #define A2DP_CODEC_VENDOR   0xFF
 
 /* Customized (BlueALSA) 16-bit vendor extension. */
@@ -189,6 +195,11 @@
 #define AAC_OBJECT_TYPE_MPEG4_AAC_LC    0x40
 #define AAC_OBJECT_TYPE_MPEG4_AAC_LTP   0x20
 #define AAC_OBJECT_TYPE_MPEG4_AAC_SCA   0x10
+#ifdef FHG_HEAAC_IN_A2DP
+#define AAC_OBJECT_TYPE_MPEG4_HEAAC     0x08
+#define AAC_OBJECT_TYPE_MPEG4_HEAACV2   0x04
+#define AAC_OBJECT_TYPE_MPEGD_DRC       0x01
+#endif
 
 #define AAC_SAMPLING_FREQ_8000          0x0800
 #define AAC_SAMPLING_FREQ_11025         0x0400
@@ -203,8 +214,15 @@
 #define AAC_SAMPLING_FREQ_88200         0x0002
 #define AAC_SAMPLING_FREQ_96000         0x0001
 
+#ifdef FHG_HEAAC_IN_A2DP
+#define AAC_CHANNELS_1                  0x08
+#define AAC_CHANNELS_2                  0x04
+#define AAC_CHANNELS_6                  0x02
+#define AAC_CHANNELS_8                  0x01
+#else
 #define AAC_CHANNELS_1                  0x02
 #define AAC_CHANNELS_2                  0x01
+#endif
 
 #define AAC_GET_BITRATE(a) ((a).bitrate1 << 16 | \
 					(a).bitrate2 << 8 | (a).bitrate3)
@@ -229,6 +247,74 @@
 #define AAC_INIT_FREQUENCY(f) \
 	.frequency1 = ((f) >> 4) & 0xff, \
 	.frequency2 = (f) & 0x0f,
+
+
+#ifdef FHG_USAC_IN_A2DP
+#define USAC_OBJECT_TYPE_MPEGD_USAC_WITH_DRC  0x80
+
+#define USAC_SAMPLING_FREQ_7350   0x2000000
+#define USAC_SAMPLING_FREQ_8000   0x1000000
+#define USAC_SAMPLING_FREQ_8820   0x0800000
+#define USAC_SAMPLING_FREQ_9600   0x0400000
+#define USAC_SAMPLING_FREQ_11025  0x0200000
+#define USAC_SAMPLING_FREQ_11760  0x0100000
+#define USAC_SAMPLING_FREQ_12000  0x0080000
+#define USAC_SAMPLING_FREQ_12800  0x0040000
+#define USAC_SAMPLING_FREQ_14700  0x0020000
+#define USAC_SAMPLING_FREQ_16000  0x0010000
+#define USAC_SAMPLING_FREQ_17640  0x0008000
+#define USAC_SAMPLING_FREQ_19200  0x0004000
+#define USAC_SAMPLING_FREQ_22050  0x0002000
+#define USAC_SAMPLING_FREQ_24000  0x0001000
+#define USAC_SAMPLING_FREQ_29400  0x0000800
+#define USAC_SAMPLING_FREQ_32000  0x0000400
+#define USAC_SAMPLING_FREQ_35280  0x0000200
+#define USAC_SAMPLING_FREQ_38400  0x0000100
+#define USAC_SAMPLING_FREQ_44100  0x0000080
+#define USAC_SAMPLING_FREQ_48000  0x0000040
+#define USAC_SAMPLING_FREQ_58800  0x0000020
+#define USAC_SAMPLING_FREQ_64000  0x0000010
+#define USAC_SAMPLING_FREQ_70560  0x0000008
+#define USAC_SAMPLING_FREQ_76800  0x0000004
+#define USAC_SAMPLING_FREQ_88200  0x0000002
+#define USAC_SAMPLING_FREQ_96000  0x0000001
+
+#define USAC_CHANNELS_1      0x08
+#define USAC_CHANNELS_2      0x04
+
+#define USAC_GET_BITRATE(a) 	((a).bitrate1 << 16 | \
+															 (a).bitrate2 << 8 | \
+															 (a).bitrate3)
+#define USAC_GET_FREQUENCY(a) ((a).frequency1 << 20 | \
+															 (a).frequency2 << 12 | \
+															 (a).frequency3 << 4 | \
+															 (a).frequency4)
+
+#define USAC_SET_BITRATE(a, b) \
+	do { \
+		(a).bitrate1 = (b >> 16) & 0x7f; \
+		(a).bitrate2 = (b >> 8) & 0xff; \
+		(a).bitrate3 = b & 0xff; \
+	} while (0)
+#define USAC_SET_FREQUENCY(a, f) \
+	do { \
+		(a).frequency1 = (f >> 20) & 0x3f; \
+		(a).frequency2 = (f >> 12) & 0xff; \
+		(a).frequency3 = (f >> 4) & 0xff; \
+		(a).frequency4 = f & 0x0f; \
+	} while (0)
+
+#define USAC_INIT_BITRATE(b) \
+	.bitrate1 = (b >> 16) & 0x7f, \
+	.bitrate2 = (b >> 8) & 0xff, \
+	.bitrate3 = b & 0xff,
+#define USAC_INIT_FREQUENCY(f) \
+	.frequency1 = (f >> 20) & 0x3f, \
+	.frequency2 = (f >> 12) & 0xff, \
+	.frequency3 = (f >> 4) & 0xff, \
+	.frequency4 = f & 0x0f,
+#endif /* FHG_USAC_IN_A2DP */
+
 
 #define ATRAC_CHANNEL_MODE_MONO         0x04
 #define ATRAC_CHANNEL_MODE_DUAL_CHANNEL 0x02
@@ -391,14 +477,33 @@ typedef struct {
 typedef struct {
 	uint8_t object_type;
 	uint8_t frequency1;
+#ifdef FHG_HEAAC_IN_A2DP
+	uint8_t channels:4;
+#else
 	uint8_t rfa:2;
 	uint8_t channels:2;
+#endif /* FHG_HEAAC_IN_A2DP */
 	uint8_t frequency2:4;
 	uint8_t bitrate1:7;
 	uint8_t vbr:1;
 	uint8_t bitrate2;
 	uint8_t bitrate3;
 } __attribute__ ((packed)) a2dp_aac_t;
+
+#ifdef FHG_USAC_IN_A2DP
+typedef struct {
+	uint8_t frequency1:6;
+	uint8_t object_type:2;
+	uint8_t frequency2;
+	uint8_t frequency3;
+	uint8_t channels:4;
+	uint8_t frequency4:4;
+	uint8_t bitrate1:7;
+	uint8_t vbr:1;
+	uint8_t bitrate2;
+	uint8_t bitrate3;
+} __attribute__ ((packed)) a2dp_usac_t;
+#endif /* FHG_USAC_IN_A2DP */
 
 typedef struct {
 	uint8_t rfa1:2;
@@ -478,13 +583,32 @@ typedef struct {
 	uint8_t object_type;
 	uint8_t frequency1;
 	uint8_t frequency2:4;
+#ifdef FHG_HEAAC_IN_A2DP
+	uint8_t channels:4;
+#else
 	uint8_t channels:2;
 	uint8_t rfa:2;
+#endif /* FHG_HEAAC_IN_A2DP */
 	uint8_t vbr:1;
 	uint8_t bitrate1:7;
 	uint8_t bitrate2;
 	uint8_t bitrate3;
 } __attribute__ ((packed)) a2dp_aac_t;
+
+#ifdef FHG_USAC_IN_A2DP
+typedef struct {
+	uint8_t object_type:2;
+	uint8_t frequency1:6;
+	uint8_t frequency2;
+	uint8_t frequency3;
+	uint8_t frequency4:4;
+	uint8_t channels:4;
+	uint8_t vbr:1;
+	uint8_t bitrate1:7;
+	uint8_t bitrate2;
+	uint8_t bitrate3;
+} __attribute__ ((packed)) a2dp_usac_t;
+#endif /* FHG_USAC_IN_A2DP */
 
 typedef struct {
 	uint8_t version:3;
