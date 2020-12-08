@@ -191,14 +191,18 @@
 	.bitrate1 = ((b) >> 8) & 0x7f, \
 	.bitrate2 = (b) & 0xff,
 
-#define AAC_OBJECT_TYPE_MPEG2_AAC_LC    0x80
-#define AAC_OBJECT_TYPE_MPEG4_AAC_LC    0x40
-#define AAC_OBJECT_TYPE_MPEG4_AAC_LTP   0x20
-#define AAC_OBJECT_TYPE_MPEG4_AAC_SCA   0x10
 #ifdef FHG_HEAAC_IN_A2DP
-#define AAC_OBJECT_TYPE_MPEG4_HEAAC     0x08
-#define AAC_OBJECT_TYPE_MPEG4_HEAACV2   0x04
-#define AAC_OBJECT_TYPE_MPEGD_DRC       0x01
+#define AAC_OBJECT_TYPE_MPEG2_AAC_LC	0x40
+#define AAC_OBJECT_TYPE_MPEG4_AAC_LC	0x20
+#define AAC_OBJECT_TYPE_MPEG4_AAC_LTP	0x10
+#define AAC_OBJECT_TYPE_MPEG4_AAC_SCA	0x08
+#define AAC_OBJECT_TYPE_MPEG4_HEAAC		0x04
+#define AAC_OBJECT_TYPE_MPEG4_HEAACV2	0x02
+#else
+#define AAC_OBJECT_TYPE_MPEG2_AAC_LC	0x80
+#define AAC_OBJECT_TYPE_MPEG4_AAC_LC	0x40
+#define AAC_OBJECT_TYPE_MPEG4_AAC_LTP	0x20
+#define AAC_OBJECT_TYPE_MPEG4_AAC_SCA	0x10
 #endif
 
 #define AAC_SAMPLING_FREQ_8000          0x0800
@@ -475,11 +479,14 @@ typedef struct {
 } __attribute__ ((packed)) a2dp_mpeg_t;
 
 typedef struct {
-	uint8_t object_type;
-	uint8_t frequency1;
 #ifdef FHG_HEAAC_IN_A2DP
+	uint8_t drc:1;
+	uint8_t object_type:7;
+	uint8_t frequency1;
 	uint8_t channels:4;
 #else
+	uint8_t object_type;
+	uint8_t frequency1;
 	uint8_t rfa:2;
 	uint8_t channels:2;
 #endif /* FHG_HEAAC_IN_A2DP */
@@ -580,12 +587,16 @@ typedef struct {
 } __attribute__ ((packed)) a2dp_mpeg_t;
 
 typedef struct {
+#ifdef FHG_HEAAC_IN_A2DP
+	uint8_t object_type:7;
+	uint8_t drc:1;
+	uint8_t frequency1;
+	uint8_t frequency2:4;
+	uint8_t channels:4;
+#else
 	uint8_t object_type;
 	uint8_t frequency1;
 	uint8_t frequency2:4;
-#ifdef FHG_HEAAC_IN_A2DP
-	uint8_t channels:4;
-#else
 	uint8_t channels:2;
 	uint8_t rfa:2;
 #endif /* FHG_HEAAC_IN_A2DP */
