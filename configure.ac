@@ -95,6 +95,14 @@ AM_COND_IF([ENABLE_AAC], [
 	AC_DEFINE([ENABLE_AAC], [1], [Define to 1 if AAC is enabled.])
 ])
 
+AC_ARG_ENABLE([usac],
+	[AS_HELP_STRING([--enable-usac], [enable USAC support])])
+AM_CONDITIONAL([ENABLE_USAC], [test "x$enable_usac" = "xyes"])
+AM_COND_IF([ENABLE_USAC], [
+	# PKG_CHECK_MODULES([USAC], [fdk-aac >= 0.1.1])
+	AC_DEFINE([ENABLE_USAC], [1], [Define to 1 if USAC is enabled.])
+])
+
 AC_ARG_ENABLE([aptx],
 	[AS_HELP_STRING([--enable-aptx], [enable apt-X encoding support])])
 AM_CONDITIONAL([ENABLE_APTX], [test "x$enable_aptx" = "xyes"])

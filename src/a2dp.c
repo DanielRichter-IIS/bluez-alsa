@@ -165,7 +165,7 @@ static const struct a2dp_sampling_freq a2dp_mpeg_samplings[] = {
 	{ 48000, MPEG_SAMPLING_FREQ_48000 },
 };
 
-static const a2dp_aac_t a2dp_aac = {
+static const a2dp_aac_t a2dp_aac = { /* TODO add DRC flag? and multichannel */
 	.object_type =
 		/* NOTE: AAC Long Term Prediction and AAC Scalable are
 		 *       not supported by the FDK-AAC library. */
@@ -305,6 +305,79 @@ static const struct a2dp_sampling_freq a2dp_ldac_samplings[] = {
 	{ 88200, LDAC_SAMPLING_FREQ_88200 },
 	{ 96000, LDAC_SAMPLING_FREQ_96000 },
 };
+
+#ifdef FHG_USAC_IN_A2DP
+static const a2dp_usac_t a2dp_usac = {
+	.object_type =
+		USAC_OBJECT_TYPE_MPEGD_USAC_WITH_DRC,
+	USAC_INIT_FREQUENCY( 
+			USAC_SAMPLING_FREQ_7350 |
+			USAC_SAMPLING_FREQ_8000 |
+			USAC_SAMPLING_FREQ_8820 |
+			USAC_SAMPLING_FREQ_9600 |
+			USAC_SAMPLING_FREQ_11025 |
+			USAC_SAMPLING_FREQ_11760 |
+			USAC_SAMPLING_FREQ_12000 |
+			USAC_SAMPLING_FREQ_12800 |
+			USAC_SAMPLING_FREQ_14700 |
+			USAC_SAMPLING_FREQ_16000 |
+			USAC_SAMPLING_FREQ_17640 |
+			USAC_SAMPLING_FREQ_19200 |
+			USAC_SAMPLING_FREQ_22050 |
+			USAC_SAMPLING_FREQ_24000 |
+			USAC_SAMPLING_FREQ_29400 |
+			USAC_SAMPLING_FREQ_32000 |
+			USAC_SAMPLING_FREQ_35280 |
+			USAC_SAMPLING_FREQ_38400 |
+			USAC_SAMPLING_FREQ_44100 |
+			USAC_SAMPLING_FREQ_48000 |
+			USAC_SAMPLING_FREQ_58800 |
+			USAC_SAMPLING_FREQ_64000 |
+			USAC_SAMPLING_FREQ_70560 |
+			USAC_SAMPLING_FREQ_76800 |
+			USAC_SAMPLING_FREQ_88200 |
+			USAC_SAMPLING_FREQ_96000)
+	.channels =
+		USAC_CHANNELS_1 |
+		USAC_CHANNELS_2,
+	.vbr = 1,
+	USAC_INIT_BITRATE(64000) /* TODO adjust init bitrate */
+};
+
+static const struct a2dp_channel_mode a2dp_usac_channels[] = {
+	{ A2DP_CHM_MONO, 1, USAC_CHANNELS_1 },
+	{ A2DP_CHM_STEREO, 2, USAC_CHANNELS_2 },
+};
+
+static const struct a2dp_sampling_freq a2dp_usac_samplings[] = {
+	{ 7350, USAC_SAMPLING_FREQ_7350 },
+	{ 8000, USAC_SAMPLING_FREQ_8000 },
+	{ 8820, USAC_SAMPLING_FREQ_8820 },
+	{ 9600, USAC_SAMPLING_FREQ_9600 },
+	{ 11025, USAC_SAMPLING_FREQ_11025 },
+	{ 11760, USAC_SAMPLING_FREQ_11760 },
+	{ 12000, USAC_SAMPLING_FREQ_12000 },
+	{ 12800, USAC_SAMPLING_FREQ_12800 },
+	{ 14700, USAC_SAMPLING_FREQ_14700 },
+	{ 16000, USAC_SAMPLING_FREQ_16000 },
+	{ 17640, USAC_SAMPLING_FREQ_17640 },
+	{ 19200, USAC_SAMPLING_FREQ_19200 },
+	{ 22050, USAC_SAMPLING_FREQ_22050 },
+	{ 24000, USAC_SAMPLING_FREQ_24000 },
+	{ 29400, USAC_SAMPLING_FREQ_29400 },
+	{ 32000, USAC_SAMPLING_FREQ_32000 },
+	{ 35280, USAC_SAMPLING_FREQ_35280 },
+	{ 38400, USAC_SAMPLING_FREQ_38400 },
+	{ 44100, USAC_SAMPLING_FREQ_44100 },
+	{ 48000, USAC_SAMPLING_FREQ_48000 },
+	{ 58800, USAC_SAMPLING_FREQ_58800 },
+	{ 64000, USAC_SAMPLING_FREQ_64000 },
+	{ 70560, USAC_SAMPLING_FREQ_70560 },
+	{ 76800, USAC_SAMPLING_FREQ_76800 },
+	{ 88200, USAC_SAMPLING_FREQ_88200 },
+	{ 96000, USAC_SAMPLING_FREQ_96000 },
+};
+#endif /* FHG_USAC_IN_A2DP */
 
 static const struct a2dp_codec a2dp_codec_source_sbc = {
 	.dir = A2DP_SOURCE,
@@ -462,7 +535,37 @@ static const struct a2dp_codec a2dp_codec_sink_ldac = {
 	.samplings_size[0] = ARRAYSIZE(a2dp_ldac_samplings),
 };
 
+#ifdef FHG_USAC_IN_A2DP
+static const struct a2dp_codec a2dp_codec_source_usac = {
+	.dir = A2DP_SOURCE,
+	.codec_id = A2DP_CODEC_MPEGD,
+	.capabilities = &a2dp_usac,
+	.capabilities_size = sizeof(a2dp_usac),
+	.channels[0] = a2dp_usac_channels,
+	.channels_size[0] = ARRAYSIZE(a2dp_usac_channels),
+	.samplings[0] = a2dp_usac_samplings,
+	.samplings_size[0] = ARRAYSIZE(a2dp_usac_samplings),
+};
+
+static const struct a2dp_codec a2dp_codec_sink_usac = {
+	.dir = A2DP_SINK,
+	.codec_id = A2DP_CODEC_MPEGD,
+	.capabilities = &a2dp_usac,
+	.capabilities_size = sizeof(a2dp_usac),
+	.channels[0] = a2dp_usac_channels,
+	.channels_size[0] = ARRAYSIZE(a2dp_usac_channels),
+	.samplings[0] = a2dp_usac_samplings,
+	.samplings_size[0] = ARRAYSIZE(a2dp_usac_samplings),
+};
+#endif /* FHG_USAC_IN_A2DP */
+
 const struct a2dp_codec *a2dp_codecs[] = {
+#ifdef FHG_USAC_IN_A2DP
+#if ENABLE_USAC
+	&a2dp_codec_source_usac,
+	&a2dp_codec_sink_usac,
+#endif
+#endif /* FHG_USAC_IN_A2DP */
 #if ENABLE_LDAC
 	&a2dp_codec_source_ldac,
 #endif
@@ -744,6 +847,24 @@ uint32_t a2dp_check_configuration(
 	}
 #endif
 
+#ifdef FHG_USAC_IN_A2DP
+#if ENABLE_USAC
+	case A2DP_CODEC_MPEGD: {
+
+		const a2dp_usac_t *cap = configuration;
+		cap_chm = cap->channels;
+		cap_freq = USAC_GET_FREQUENCY(*cap);
+
+		if (cap->object_type != USAC_OBJECT_TYPE_MPEGD_USAC_WITH_DRC) {
+			debug("Invalid USAC object type: %#x", cap->object_type);
+			ret |= A2DP_CHECK_ERR_USAC_OBJ_TYPE;
+		}
+
+		break;
+	}
+#endif
+#endif /* FHG_USAC_IN_A2DP */
+
 	default:
 		g_assert_not_reached();
 	}
@@ -826,6 +947,15 @@ int a2dp_filter_capabilities(
 	case A2DP_CODEC_VENDOR_LDAC:
 		break;
 #endif
+#ifdef FHG_USAC_IN_A2DP
+#if ENABLE_USAC
+	case A2DP_CODEC_MPEGD:
+		USAC_SET_BITRATE(*(a2dp_usac_t *)tmp, MIN(
+					USAC_GET_BITRATE(*(a2dp_usac_t *)capabilities),
+					USAC_GET_BITRATE(*(a2dp_usac_t *)codec->capabilities)));
+		break;
+#endif
+#endif /* FHG_USAC_IN_A2DP */
 	default:
 		g_assert_not_reached();
 	}
@@ -1115,6 +1245,42 @@ int a2dp_select_configuration(
 		break;
 	}
 #endif
+
+#ifdef FHG_USAC_IN_A2DP
+#if ENABLE_USAC
+	case A2DP_CODEC_MPEGD: {
+
+		a2dp_usac_t *cap = capabilities;
+		unsigned int cap_chm = cap->channels;
+		unsigned int cap_freq = USAC_GET_FREQUENCY(*cap);
+
+		if (cap->object_type & USAC_OBJECT_TYPE_MPEGD_USAC_WITH_DRC)
+			cap->object_type = USAC_OBJECT_TYPE_MPEGD_USAC_WITH_DRC;
+		else {
+			error("USAC: No supported object type: %#x", cap->object_type);
+			goto fail;
+		}
+
+		if ((cap->channels = a2dp_codec_select_channel_mode(codec, cap_chm, false)) == 0) {
+			error("USAC: No supported channels: %#x", cap_chm);
+			goto fail;
+		}
+
+		unsigned int freq;
+		if ((freq = a2dp_codec_select_sampling_freq(codec, cap_freq, false)) != 0)
+			USAC_SET_FREQUENCY(*cap, freq);
+		else {
+			error("USAC: No supported sampling frequencies: %#x", cap_freq);
+			goto fail;
+		}
+
+		if (USAC_GET_BITRATE(*cap) == 0)
+			USAC_SET_BITRATE(*cap, USAC_GET_BITRATE(*(a2dp_usac_t *)codec->capabilities));
+
+		break;
+	}
+#endif
+#endif /* FHG_USAC_IN_A2DP */
 
 	default:
 		g_assert_not_reached();

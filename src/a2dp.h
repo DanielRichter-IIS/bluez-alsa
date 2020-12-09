@@ -11,6 +11,8 @@
 #ifndef BLUEALSA_A2DP_H_
 #define BLUEALSA_A2DP_H_
 
+//#define FHG_USAC_IN_A2DP
+
 #if HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -97,6 +99,9 @@ uint16_t a2dp_get_vendor_codec_id(
 #define A2DP_CHECK_ERR_SBC_BLOCK_LENGTH  (1 << 6)
 #define A2DP_CHECK_ERR_MPEG_LAYER        (1 << 7)
 #define A2DP_CHECK_ERR_AAC_OBJ_TYPE      (1 << 8)
+#ifdef FHG_USAC_IN_A2DP
+#define A2DP_CHECK_ERR_USAC_OBJ_TYPE     (1 << 9)
+#endif
 
 uint32_t a2dp_check_configuration(
 		const struct a2dp_codec *codec,

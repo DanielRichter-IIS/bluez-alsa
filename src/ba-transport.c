@@ -560,6 +560,13 @@ static void transport_update_channels(struct ba_transport *t) {
 			cfg_value = ((a2dp_ldac_t *)t->a2dp.configuration)->channel_mode;
 			break;
 #endif
+#ifdef FHG_USAC_IN_A2DP
+#if ENABLE_USAC
+		case A2DP_CODEC_MPEGD:
+			cfg_value = ((a2dp_usac_t *)t->a2dp.configuration)->channels;
+			break;
+#endif
+#endif /* FHG_USAC_IN_A2DP */
 		default:
 			warn("Unsupported A2DP codec: %#x", t->type.codec);
 		}
@@ -629,6 +636,13 @@ static void transport_update_sampling(struct ba_transport *t) {
 			cfg_value = ((a2dp_ldac_t *)t->a2dp.configuration)->frequency;
 			break;
 #endif
+#ifdef FHG_USAC_IN_A2DP
+#if ENABLE_USAC
+		case A2DP_CODEC_MPEGD:
+			cfg_value = USAC_GET_FREQUENCY(*(a2dp_usac_t *)t->a2dp.configuration);
+			break;
+#endif
+#endif /* FHG_USAC_IN_A2DP */
 		default:
 			warn("Unsupported A2DP codec: %#x", t->type.codec);
 		}

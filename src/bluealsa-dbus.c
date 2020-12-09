@@ -184,6 +184,12 @@ static bool ba_variant_populate_sep(GVariantBuilder *props, const struct a2dp_se
 	case A2DP_CODEC_VENDOR_LDAC:
 		break;
 #endif
+#ifdef FHG_USAC_IN_A2DP
+#if ENABLE_USAC
+	case A2DP_CODEC_MPEGD:
+		break;
+#endif
+#endif /* FHG_USAC_IN_A2DP */
 	default:
 		g_assert_not_reached();
 	}

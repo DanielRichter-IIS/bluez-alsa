@@ -98,6 +98,12 @@ const char *g_dbus_transport_type_to_bluez_object_path(struct ba_transport_type 
 		case A2DP_CODEC_VENDOR_LDAC:
 			return "/A2DP/LDAC/Source";
 #endif
+#ifdef FHG_USAC_IN_A2DP
+#if ENABLE_USAC
+		case A2DP_CODEC_MPEGD:
+			return "/A2DP/USAC/Source";
+#endif
+#endif /* FHG_USAC_IN_A2DP */
 		default:
 			warn("Unsupported A2DP codec: %#x", type.codec);
 			return "/A2DP/Source";
@@ -130,6 +136,12 @@ const char *g_dbus_transport_type_to_bluez_object_path(struct ba_transport_type 
 		case A2DP_CODEC_VENDOR_LDAC:
 			return "/A2DP/LDAC/Sink";
 #endif
+#ifdef FHG_USAC_IN_A2DP
+#if ENABLE_USAC
+		case A2DP_CODEC_MPEGD:
+			return "/A2DP/USAC/Sink";
+#endif
+#endif /* FHG_USAC_IN_A2DP */
 		default:
 			warn("Unsupported A2DP codec: %#x", type.codec);
 			return "/A2DP/Sink";
@@ -225,6 +237,11 @@ uint16_t ba_transport_codecs_a2dp_from_string(const char *str) {
 #if ENABLE_LDAC
 		A2DP_CODEC_VENDOR_LDAC,
 #endif
+#ifdef FHG_USAC_IN_A2DP
+#if ENABLE_USAC
+		A2DP_CODEC_MPEGD,
+#endif
+#endif /* FHG_USAC_IN_A2DP */
 	};
 
 	size_t i;
@@ -274,6 +291,10 @@ const char *ba_transport_codecs_a2dp_to_string(uint16_t codec) {
 		return "samsung-HD";
 	case A2DP_CODEC_VENDOR_SAMSUNG_SC:
 		return "samsung-SC";
+#ifdef FHG_USAC_IN_A2DP
+	case A2DP_CODEC_MPEGD:
+		return "USAC";
+#endif /* FHG_USAC_IN_A2DP */
 	default:
 		return NULL;
 	}
@@ -352,6 +373,12 @@ const char *ba_transport_type_to_string(struct ba_transport_type type) {
 		case A2DP_CODEC_VENDOR_LDAC:
 			return "A2DP Source (LDAC)";
 #endif
+#ifdef FHG_USAC_IN_A2DP
+#if ENABLE_USAC
+		case A2DP_CODEC_MPEGD:
+			return "A2DP Source (USAC)";
+#endif
+#endif /* FHG_USAC_IN_A2DP */
 		default:
 			return "A2DP Source";
 		}
@@ -383,6 +410,12 @@ const char *ba_transport_type_to_string(struct ba_transport_type type) {
 		case A2DP_CODEC_VENDOR_LDAC:
 			return "A2DP Sink (LDAC)";
 #endif
+#ifdef FHG_USAC_IN_A2DP
+#if ENABLE_USAC
+		case A2DP_CODEC_MPEGD:
+			return "A2DP Sink (USAC)";
+#endif
+#endif /* FHG_USAC_IN_A2DP */
 		default:
 			return "A2DP Sink";
 		}
