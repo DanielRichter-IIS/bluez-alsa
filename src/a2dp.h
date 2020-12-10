@@ -44,7 +44,11 @@ struct a2dp_channel_mode {
 
 struct a2dp_sampling_freq {
 	unsigned int frequency;
+#ifdef FHG_USAC_IN_A2DP
+	uint32_t value;
+#else
 	uint16_t value;
+#endif
 };
 
 struct a2dp_codec {
