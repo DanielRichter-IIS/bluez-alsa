@@ -27,10 +27,10 @@
 #ifndef BLUEALSA_A2DPCODECS_H_
 #define BLUEALSA_A2DPCODECS_H_
 
-#define FHG_USAC_IN_A2DP
-//#define FHG_HEAAC_IN_A2DP
+/*#define FHG_USAC_IN_A2DP*/
+/*#define FHG_HEAAC_IN_A2DP*/
 
-//#define ENABLE_USAC 1
+/*#define ENABLE_USAC 1*/
 
 #include <endian.h>
 #include <stdint.h>
