@@ -194,17 +194,17 @@
 	.bitrate2 = (b) & 0xff,
 
 #ifdef FHG_HEAAC_IN_A2DP
-#define AAC_OBJECT_TYPE_MPEG2_AAC_LC	0x40
-#define AAC_OBJECT_TYPE_MPEG4_AAC_LC	0x20
-#define AAC_OBJECT_TYPE_MPEG4_AAC_LTP	0x10
-#define AAC_OBJECT_TYPE_MPEG4_AAC_SCA	0x08
-#define AAC_OBJECT_TYPE_MPEG4_HEAAC		0x04
-#define AAC_OBJECT_TYPE_MPEG4_HEAACV2	0x02
+#define AAC_OBJECT_TYPE_MPEG2_AAC_LC    0x40
+#define AAC_OBJECT_TYPE_MPEG4_AAC_LC    0x20
+#define AAC_OBJECT_TYPE_MPEG4_AAC_LTP   0x10
+#define AAC_OBJECT_TYPE_MPEG4_AAC_SCA   0x08
+#define AAC_OBJECT_TYPE_MPEG4_HEAAC     0x04
+#define AAC_OBJECT_TYPE_MPEG4_HEAACV2   0x02
 #else
-#define AAC_OBJECT_TYPE_MPEG2_AAC_LC	0x80
-#define AAC_OBJECT_TYPE_MPEG4_AAC_LC	0x40
-#define AAC_OBJECT_TYPE_MPEG4_AAC_LTP	0x20
-#define AAC_OBJECT_TYPE_MPEG4_AAC_SCA	0x10
+#define AAC_OBJECT_TYPE_MPEG2_AAC_LC    0x80
+#define AAC_OBJECT_TYPE_MPEG4_AAC_LC    0x40
+#define AAC_OBJECT_TYPE_MPEG4_AAC_LTP   0x20
+#define AAC_OBJECT_TYPE_MPEG4_AAC_SCA   0x10
 #endif
 
 #define AAC_SAMPLING_FREQ_8000          0x0800
@@ -288,13 +288,13 @@
 #define USAC_CHANNELS_1      0x08
 #define USAC_CHANNELS_2      0x04
 
-#define USAC_GET_BITRATE(a) 	((a).bitrate1 << 16 | \
-															 (a).bitrate2 << 8 | \
-															 (a).bitrate3)
+#define USAC_GET_BITRATE(a) ((a).bitrate1 << 16 | \
+					(a).bitrate2 << 8 | \
+					(a).bitrate3)
 #define USAC_GET_FREQUENCY(a) ((a).frequency1 << 20 | \
-															 (a).frequency2 << 12 | \
-															 (a).frequency3 << 4 | \
-															 (a).frequency4)
+					(a).frequency2 << 12 | \
+					(a).frequency3 << 4 | \
+					(a).frequency4)
 
 #define USAC_SET_BITRATE(a, b) \
 	do { \
