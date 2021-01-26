@@ -11,7 +11,7 @@
 #ifndef BLUEALSA_A2DP_H_
 #define BLUEALSA_A2DP_H_
 
-/*#define FHG_USAC_IN_A2DP*/
+#define FHG_USAC_IN_A2DP
 
 #if HAVE_CONFIG_H
 # include <config.h>
