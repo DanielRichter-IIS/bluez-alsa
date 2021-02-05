@@ -170,7 +170,14 @@ static const a2dp_aac_t a2dp_aac = { /* TODO add DRC flag? and multichannel */
 		/* NOTE: AAC Long Term Prediction and AAC Scalable are
 		 *       not supported by the FDK-AAC library. */
 		AAC_OBJECT_TYPE_MPEG2_AAC_LC |
+#ifdef FHG_HEAAC_IN_A2DP
+		AAC_OBJECT_TYPE_MPEG4_AAC_LC |
+		AAC_OBJECT_TYPE_MPEG4_HEAAC |
+		AAC_OBJECT_TYPE_MPEG4_HEAACV2, /* TODO Add ELD */
+	.drc = 1,
+#else
 		AAC_OBJECT_TYPE_MPEG4_AAC_LC,
+#endif
 	AAC_INIT_FREQUENCY(
 			AAC_SAMPLING_FREQ_8000 |
 			AAC_SAMPLING_FREQ_11025 |
@@ -194,6 +201,10 @@ static const a2dp_aac_t a2dp_aac = { /* TODO add DRC flag? and multichannel */
 static const struct a2dp_channel_mode a2dp_aac_channels[] = {
 	{ A2DP_CHM_MONO, 1, AAC_CHANNELS_1 },
 	{ A2DP_CHM_STEREO, 2, AAC_CHANNELS_2 },
+#ifdef FHG_HEAAC_IN_A2DP
+	{ A2DP_CHM_5_1, 6, AAC_CHANNELS_6 },
+	{ A2DP_CHM_7_1, 8, AAC_CHANNELS_8 },
+#endif
 };
 
 static const struct a2dp_sampling_freq a2dp_aac_samplings[] = {

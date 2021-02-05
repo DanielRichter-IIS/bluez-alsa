@@ -12,6 +12,7 @@
 #define BLUEALSA_A2DP_H_
 
 #define FHG_USAC_IN_A2DP
+/*#define FHG_HEAAC_IN_A2DP*/
 
 #if HAVE_CONFIG_H
 # include <config.h>
@@ -34,6 +35,10 @@ enum a2dp_chm {
 	A2DP_CHM_STEREO,
 	/* L+R (mid) and L-R (side) encoding */
 	A2DP_CHM_JOINT_STEREO,
+#ifdef FHG_HEAAC_IN_A2DP
+	A2DP_CHM_5_1,
+	A2DP_CHM_7_1,
+#endif
 };
 
 struct a2dp_channel_mode {
