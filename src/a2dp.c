@@ -799,12 +799,19 @@ uint32_t a2dp_check_configuration(
 		cap_chm = cap->channels;
 		cap_freq = AAC_GET_FREQUENCY(*cap);
 
+#ifdef FHG_HEAAC_IN_A2DP
 		if (cap->object_type != AAC_OBJECT_TYPE_MPEG2_AAC_LC &&
 				cap->object_type != AAC_OBJECT_TYPE_MPEG4_AAC_LC &&
 				cap->object_type != AAC_OBJECT_TYPE_MPEG4_AAC_LTP &&
 				cap->object_type != AAC_OBJECT_TYPE_MPEG4_AAC_SCA &&
 				cap->object_type != AAC_OBJECT_TYPE_MPEG4_HEAAC &&
 				cap->object_type != AAC_OBJECT_TYPE_MPEG4_HEAACV2) {
+#else
+		if (cap->object_type != AAC_OBJECT_TYPE_MPEG2_AAC_LC &&
+				cap->object_type != AAC_OBJECT_TYPE_MPEG4_AAC_LC &&
+				cap->object_type != AAC_OBJECT_TYPE_MPEG4_AAC_LTP &&
+				cap->object_type != AAC_OBJECT_TYPE_MPEG4_AAC_SCA) {
+#endif
 			debug("Invalid AAC object type: %#x", cap->object_type);
 			ret |= A2DP_CHECK_ERR_AAC_OBJ_TYPE;
 		}
@@ -1131,12 +1138,17 @@ int a2dp_select_configuration(
 		unsigned int cap_chm = cap->channels;
 		unsigned int cap_freq = AAC_GET_FREQUENCY(*cap);
 
+#ifdef FHG_HEAAC_IN_A2DP
 		if (cap->object_type & AAC_OBJECT_TYPE_MPEG4_HEAACV2)
 			cap->object_type = AAC_OBJECT_TYPE_MPEG4_HEAACV2;
 		else if (cap->object_type & AAC_OBJECT_TYPE_MPEG4_HEAAC)
 			cap->object_type = AAC_OBJECT_TYPE_MPEG4_HEAAC;
 		else if (cap->object_type & AAC_OBJECT_TYPE_MPEG4_AAC_SCA)
 			cap->object_type = AAC_OBJECT_TYPE_MPEG4_AAC_SCA;
+#else
+		if (cap->object_type & AAC_OBJECT_TYPE_MPEG4_AAC_SCA)
+			cap->object_type = AAC_OBJECT_TYPE_MPEG4_AAC_SCA;
+#endif
 		else if (cap->object_type & AAC_OBJECT_TYPE_MPEG4_AAC_LTP)
 			cap->object_type = AAC_OBJECT_TYPE_MPEG4_AAC_LTP;
 		else if (cap->object_type & AAC_OBJECT_TYPE_MPEG4_AAC_LC)
