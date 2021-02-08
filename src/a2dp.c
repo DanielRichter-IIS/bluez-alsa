@@ -193,7 +193,13 @@ static const a2dp_aac_t a2dp_aac = { /* TODO add DRC flag? and multichannel */
 			AAC_SAMPLING_FREQ_96000)
 	.channels =
 		AAC_CHANNELS_1 |
+#if FHG_HEAAC_IN_A2DP
+		AAC_CHANNELS_2 |
+		AAC_CHANNELS_6 |
+		AAC_CHANNELS_8,
+#else
 		AAC_CHANNELS_2,
+#endif
 	.vbr = 1,
 	AAC_INIT_BITRATE(320000)
 };
