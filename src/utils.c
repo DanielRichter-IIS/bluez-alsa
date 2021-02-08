@@ -98,7 +98,7 @@ const char *g_dbus_transport_type_to_bluez_object_path(struct ba_transport_type 
 		case A2DP_CODEC_VENDOR_LDAC:
 			return "/A2DP/LDAC/Source";
 #endif
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 #if ENABLE_USAC
 		case A2DP_CODEC_MPEGD:
 			return "/A2DP/USAC/Source";
@@ -136,7 +136,7 @@ const char *g_dbus_transport_type_to_bluez_object_path(struct ba_transport_type 
 		case A2DP_CODEC_VENDOR_LDAC:
 			return "/A2DP/LDAC/Sink";
 #endif
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 #if ENABLE_USAC
 		case A2DP_CODEC_MPEGD:
 			return "/A2DP/USAC/Sink";
@@ -237,7 +237,7 @@ uint16_t ba_transport_codecs_a2dp_from_string(const char *str) {
 #if ENABLE_LDAC
 		A2DP_CODEC_VENDOR_LDAC,
 #endif
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 #if ENABLE_USAC
 		A2DP_CODEC_MPEGD,
 #endif
@@ -291,7 +291,7 @@ const char *ba_transport_codecs_a2dp_to_string(uint16_t codec) {
 		return "samsung-HD";
 	case A2DP_CODEC_VENDOR_SAMSUNG_SC:
 		return "samsung-SC";
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 	case A2DP_CODEC_MPEGD:
 		return "USAC";
 #endif /* FHG_USAC_IN_A2DP */
@@ -373,7 +373,7 @@ const char *ba_transport_type_to_string(struct ba_transport_type type) {
 		case A2DP_CODEC_VENDOR_LDAC:
 			return "A2DP Source (LDAC)";
 #endif
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 #if ENABLE_USAC
 		case A2DP_CODEC_MPEGD:
 			return "A2DP Source (USAC)";
@@ -410,7 +410,7 @@ const char *ba_transport_type_to_string(struct ba_transport_type type) {
 		case A2DP_CODEC_VENDOR_LDAC:
 			return "A2DP Sink (LDAC)";
 #endif
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 #if ENABLE_USAC
 		case A2DP_CODEC_MPEGD:
 			return "A2DP Sink (USAC)";

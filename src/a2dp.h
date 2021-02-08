@@ -11,9 +11,6 @@
 #ifndef BLUEALSA_A2DP_H_
 #define BLUEALSA_A2DP_H_
 
-#define FHG_USAC_IN_A2DP
-/*#define FHG_HEAAC_IN_A2DP*/
-
 #if HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -35,7 +32,7 @@ enum a2dp_chm {
 	A2DP_CHM_STEREO,
 	/* L+R (mid) and L-R (side) encoding */
 	A2DP_CHM_JOINT_STEREO,
-#ifdef FHG_HEAAC_IN_A2DP
+#if FHG_HEAAC_IN_A2DP
 	A2DP_CHM_5_1,
 	A2DP_CHM_7_1,
 #endif
@@ -49,7 +46,7 @@ struct a2dp_channel_mode {
 
 struct a2dp_sampling_freq {
 	unsigned int frequency;
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 	uint32_t value;
 #else
 	uint16_t value;
@@ -108,7 +105,7 @@ uint16_t a2dp_get_vendor_codec_id(
 #define A2DP_CHECK_ERR_SBC_BLOCK_LENGTH  (1 << 6)
 #define A2DP_CHECK_ERR_MPEG_LAYER        (1 << 7)
 #define A2DP_CHECK_ERR_AAC_OBJ_TYPE      (1 << 8)
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 #define A2DP_CHECK_ERR_USAC_OBJ_TYPE     (1 << 9)
 #endif
 

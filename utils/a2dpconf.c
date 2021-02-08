@@ -159,14 +159,14 @@ static void dump_mpeg(const a2dp_mpeg_t *mpeg) {
 
 static void dump_aac(const a2dp_aac_t *aac) {
 	printf("MPEG-2,4 AAC <hex:%s> {\n"
-#ifdef FHG_HEAAC_IN_A2DP
+#if FHG_HEAAC_IN_A2DP
 			"  object-type:7 =%s%s%s%s%s%s\n"
 			"  drc:1 = %s\n"
 #else
 			"  object-type:8 =%s%s%s%s\n"
 #endif
 			"  sampling-frequency:12 =%s%s%s%s%s%s%s%s%s%s%s%s\n"
-#ifdef FHG_HEAAC_IN_A2DP
+#if FHG_HEAAC_IN_A2DP
 			"  channel-mode:4 =%s%s%s%s\n"
 #else
 			"  channel-mode:2 =%s%s\n"
@@ -180,7 +180,7 @@ static void dump_aac(const a2dp_aac_t *aac) {
 			aac->object_type & AAC_OBJECT_TYPE_MPEG4_AAC_LTP ? " MPGE4-LTP" : "",
 			aac->object_type & AAC_OBJECT_TYPE_MPEG4_AAC_LC ? " MPGE4-LC" : "",
 			aac->object_type & AAC_OBJECT_TYPE_MPEG2_AAC_LC ? " MPGE2-LC" : "",
-#ifdef FHG_HEAAC_IN_A2DP
+#if FHG_HEAAC_IN_A2DP
 			aac->object_type & AAC_OBJECT_TYPE_MPEG4_HEAAC ? " MPEG-4-HE-AAC" : "",
 			aac->object_type & AAC_OBJECT_TYPE_MPEG4_HEAACV2 ? " MPEG-4-HE-AACv2" : "", /* TODO Add ELD */
 			aac->drc ? "true" : "false",
@@ -197,7 +197,7 @@ static void dump_aac(const a2dp_aac_t *aac) {
 			AAC_GET_FREQUENCY(*aac) & AAC_SAMPLING_FREQ_12000 ? " 12000" : "",
 			AAC_GET_FREQUENCY(*aac) & AAC_SAMPLING_FREQ_11025 ? " 11025" : "",
 			AAC_GET_FREQUENCY(*aac) & AAC_SAMPLING_FREQ_8000 ? " 8000" : "",
-#ifdef FHG_HEAAC_IN_A2DP
+#if FHG_HEAAC_IN_A2DP
 			aac->channels & AAC_CHANNELS_8 ? " 8 (7.1)" : "",
 			aac->channels & AAC_CHANNELS_6 ? " 6 (5.1)" : "",
 #endif

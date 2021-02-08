@@ -170,7 +170,7 @@ static const a2dp_aac_t a2dp_aac = { /* TODO add DRC flag? and multichannel */
 		/* NOTE: AAC Long Term Prediction and AAC Scalable are
 		 *       not supported by the FDK-AAC library. */
 		AAC_OBJECT_TYPE_MPEG2_AAC_LC |
-#ifdef FHG_HEAAC_IN_A2DP
+#if FHG_HEAAC_IN_A2DP
 		AAC_OBJECT_TYPE_MPEG4_AAC_LC |
 		AAC_OBJECT_TYPE_MPEG4_HEAAC |
 		AAC_OBJECT_TYPE_MPEG4_HEAACV2, /* TODO Add ELD */
@@ -201,7 +201,7 @@ static const a2dp_aac_t a2dp_aac = { /* TODO add DRC flag? and multichannel */
 static const struct a2dp_channel_mode a2dp_aac_channels[] = {
 	{ A2DP_CHM_MONO, 1, AAC_CHANNELS_1 },
 	{ A2DP_CHM_STEREO, 2, AAC_CHANNELS_2 },
-#ifdef FHG_HEAAC_IN_A2DP
+#if FHG_HEAAC_IN_A2DP
 	{ A2DP_CHM_5_1, 6, AAC_CHANNELS_6 },
 	{ A2DP_CHM_7_1, 8, AAC_CHANNELS_8 },
 #endif
@@ -317,7 +317,7 @@ static const struct a2dp_sampling_freq a2dp_ldac_samplings[] = {
 	{ 96000, LDAC_SAMPLING_FREQ_96000 },
 };
 
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 static const a2dp_usac_t a2dp_usac = {
 	.object_type =
 		USAC_OBJECT_TYPE_MPEGD_USAC_WITH_DRC,
@@ -546,7 +546,7 @@ static const struct a2dp_codec a2dp_codec_sink_ldac = {
 	.samplings_size[0] = ARRAYSIZE(a2dp_ldac_samplings),
 };
 
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 static const struct a2dp_codec a2dp_codec_source_usac = {
 	.dir = A2DP_SOURCE,
 	.codec_id = A2DP_CODEC_MPEGD,
@@ -571,7 +571,7 @@ static const struct a2dp_codec a2dp_codec_sink_usac = {
 #endif /* FHG_USAC_IN_A2DP */
 
 const struct a2dp_codec *a2dp_codecs[] = {
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 #if ENABLE_USAC
 	&a2dp_codec_source_usac,
 	&a2dp_codec_sink_usac,
@@ -810,7 +810,7 @@ uint32_t a2dp_check_configuration(
 		cap_chm = cap->channels;
 		cap_freq = AAC_GET_FREQUENCY(*cap);
 
-#ifdef FHG_HEAAC_IN_A2DP
+#if FHG_HEAAC_IN_A2DP
 		if (cap->object_type != AAC_OBJECT_TYPE_MPEG2_AAC_LC &&
 				cap->object_type != AAC_OBJECT_TYPE_MPEG4_AAC_LC &&
 				cap->object_type != AAC_OBJECT_TYPE_MPEG4_AAC_LTP &&
@@ -867,7 +867,7 @@ uint32_t a2dp_check_configuration(
 	}
 #endif
 
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 #if ENABLE_USAC
 	case A2DP_CODEC_MPEGD: {
 
@@ -967,7 +967,7 @@ int a2dp_filter_capabilities(
 	case A2DP_CODEC_VENDOR_LDAC:
 		break;
 #endif
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 #if ENABLE_USAC
 	case A2DP_CODEC_MPEGD:
 		USAC_SET_BITRATE(*(a2dp_usac_t *)tmp, MIN(
@@ -1149,7 +1149,7 @@ int a2dp_select_configuration(
 		unsigned int cap_chm = cap->channels;
 		unsigned int cap_freq = AAC_GET_FREQUENCY(*cap);
 
-#ifdef FHG_HEAAC_IN_A2DP
+#if FHG_HEAAC_IN_A2DP
 		if (cap->object_type & AAC_OBJECT_TYPE_MPEG4_HEAACV2)
 			cap->object_type = AAC_OBJECT_TYPE_MPEG4_HEAACV2;
 		else if (cap->object_type & AAC_OBJECT_TYPE_MPEG4_HEAAC)
@@ -1275,7 +1275,7 @@ int a2dp_select_configuration(
 	}
 #endif
 
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 #if ENABLE_USAC
 	case A2DP_CODEC_MPEGD: {
 

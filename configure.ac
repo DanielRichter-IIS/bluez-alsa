@@ -87,6 +87,9 @@ PKG_CHECK_MODULES([SBC], [sbc >= 1.2])
 AM_CONDITIONAL([ALSA_1_1_2__1_1_3], [$PKG_CONFIG "alsa >= 1.1.2 alsa <= 1.1.3"])
 AM_CONDITIONAL([ALSA_1_1_7], [$PKG_CONFIG --atleast-version=1.1.7 alsa])
 
+AC_DEFINE([FHG_USAC_IN_A2DP], [0], [Set USAC development define to 1])
+AC_DEFINE([FHG_HEAAC_IN_A2DP], [0], [Set HEAAC development define to 1])
+
 AC_ARG_ENABLE([aac],
 	[AS_HELP_STRING([--enable-aac], [enable AAC support])])
 AM_CONDITIONAL([ENABLE_AAC], [test "x$enable_aac" = "xyes"])

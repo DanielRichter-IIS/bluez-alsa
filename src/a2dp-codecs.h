@@ -27,11 +27,6 @@
 #ifndef BLUEALSA_A2DPCODECS_H_
 #define BLUEALSA_A2DPCODECS_H_
 
-#define FHG_USAC_IN_A2DP
-/*#define FHG_HEAAC_IN_A2DP*/
-
-/*#define ENABLE_USAC 1*/
-
 #include <endian.h>
 #include <stdint.h>
 
@@ -41,7 +36,7 @@
 #define A2DP_CODEC_MPEG12   0x01
 #define A2DP_CODEC_MPEG24   0x02
 #define A2DP_CODEC_ATRAC    0x04
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 #define A2DP_CODEC_MPEGD    0x08
 #endif
 #define A2DP_CODEC_VENDOR   0xFF
@@ -193,7 +188,7 @@
 	.bitrate1 = ((b) >> 8) & 0x7f, \
 	.bitrate2 = (b) & 0xff,
 
-#ifdef FHG_HEAAC_IN_A2DP
+#if FHG_HEAAC_IN_A2DP
 #define AAC_OBJECT_TYPE_MPEG2_AAC_LC    0x40
 #define AAC_OBJECT_TYPE_MPEG4_AAC_LC    0x20
 #define AAC_OBJECT_TYPE_MPEG4_AAC_LTP   0x10
@@ -220,7 +215,7 @@
 #define AAC_SAMPLING_FREQ_88200         0x0002
 #define AAC_SAMPLING_FREQ_96000         0x0001
 
-#ifdef FHG_HEAAC_IN_A2DP
+#if FHG_HEAAC_IN_A2DP
 #define AAC_CHANNELS_1                  0x08
 #define AAC_CHANNELS_2                  0x04
 #define AAC_CHANNELS_6                  0x02
@@ -255,7 +250,7 @@
 	.frequency2 = (f) & 0x0f,
 
 
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 #define USAC_OBJECT_TYPE_MPEGD_USAC_WITH_DRC  0x02
 
 #define USAC_SAMPLING_FREQ_7350   0x02000000
@@ -481,7 +476,7 @@ typedef struct {
 } __attribute__ ((packed)) a2dp_mpeg_t;
 
 typedef struct {
-#ifdef FHG_HEAAC_IN_A2DP
+#if FHG_HEAAC_IN_A2DP
 	uint8_t drc:1;
 	uint8_t object_type:7;
 	uint8_t frequency1;
@@ -499,7 +494,7 @@ typedef struct {
 	uint8_t bitrate3;
 } __attribute__ ((packed)) a2dp_aac_t;
 
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 typedef struct {
 	uint8_t frequency1:6;
 	uint8_t object_type:2;
@@ -589,7 +584,7 @@ typedef struct {
 } __attribute__ ((packed)) a2dp_mpeg_t;
 
 typedef struct {
-#ifdef FHG_HEAAC_IN_A2DP
+#if FHG_HEAAC_IN_A2DP
 	uint8_t object_type:7;
 	uint8_t drc:1;
 	uint8_t frequency1;
@@ -608,7 +603,7 @@ typedef struct {
 	uint8_t bitrate3;
 } __attribute__ ((packed)) a2dp_aac_t;
 
-#ifdef FHG_USAC_IN_A2DP
+#if FHG_USAC_IN_A2DP
 typedef struct {
 	uint8_t object_type:2;
 	uint8_t frequency1:6;
