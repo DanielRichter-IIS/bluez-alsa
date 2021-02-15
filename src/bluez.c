@@ -44,6 +44,17 @@
 #include "shared/defs.h"
 #include "shared/log.h"
 
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(byte)  \
+  (byte & 0x80 ? '1' : '0'), \
+  (byte & 0x40 ? '1' : '0'), \
+  (byte & 0x20 ? '1' : '0'), \
+  (byte & 0x10 ? '1' : '0'), \
+  (byte & 0x08 ? '1' : '0'), \
+  (byte & 0x04 ? '1' : '0'), \
+  (byte & 0x02 ? '1' : '0'), \
+  (byte & 0x01 ? '1' : '0')
+
 /* Compatibility patch for glib < 2.42. */
 #ifndef G_DBUS_ERROR_UNKNOWN_OBJECT
 # define G_DBUS_ERROR_UNKNOWN_OBJECT G_DBUS_ERROR_FAILED
@@ -142,11 +153,19 @@ static void bluez_endpoint_select_configuration(GDBusMethodInvocation *inv) {
 	const void *data;
 	void *capabilities;
 	size_t size = 0;
+	size_t j;
 
 	params = g_variant_get_child_value(params, 0);
 	data = g_variant_get_fixed_array(params, &size, sizeof(char));
 	capabilities = g_memdup(data, size);
 	g_variant_unref(params);
+
+	debug("DEB ##### SelectConfiguration START");
+	debug("DEB SelectConfiguration: codec ID = %d (%s)", codec->codec_id, ba_transport_codecs_a2dp_to_string(codec->codec_id));
+	for (j = 0; j < codec->capabilities_size; j++) {
+		debug("DEB SelectConfiguration: registered capabilities[%d] = "BYTE_TO_BINARY_PATTERN, j, BYTE_TO_BINARY(((uint8_t *)codec->capabilities)[j]));
+		debug("DEB SelectConfiguration: replied capabilities[%d]    = "BYTE_TO_BINARY_PATTERN, j, BYTE_TO_BINARY(((uint8_t *)capabilities)[j]));
+	}
 
 	if (a2dp_select_configuration(codec, capabilities, size) == -1)
 		goto fail;
@@ -197,6 +216,8 @@ static void bluez_endpoint_set_configuration(GDBusMethodInvocation *inv) {
 	GVariant *value = NULL;
 	const char *property;
 
+	debug("DEB ##### SetConfiguration START");
+
 	g_variant_get(params, "(&oa{sv})", &transport_path, &properties);
 	while (g_variant_iter_next(properties, "{&sv}", &property, &value)) {
 
@@ -211,6 +232,9 @@ static void bluez_endpoint_set_configuration(GDBusMethodInvocation *inv) {
 		else if (strcmp(property, "Codec") == 0 &&
 				g_variant_validate_value(value, G_VARIANT_TYPE_BYTE, property)) {
 
+			debug("DEB SetConfiguration: selected codec ID = %d (%s)", codec->codec_id, ba_transport_codecs_a2dp_to_string(codec->codec_id));
+			debug("DEB SetConfiguration: replied codec ID  = %d (%s)", g_variant_get_byte(value), ba_transport_codecs_a2dp_to_string(g_variant_get_byte(value)));
+
 			if ((codec_id & 0xFF) != g_variant_get_byte(value)) {
 				error("Invalid configuration: %s", "Codec mismatch");
 				goto fail;
@@ -224,6 +248,17 @@ static void bluez_endpoint_set_configuration(GDBusMethodInvocation *inv) {
 			const void *data = g_variant_get_fixed_array(value, &size, sizeof(char));
 
 			uint32_t rv;
+
+			size_t i;
+			for (i = 0; i < codec->capabilities_size; i++) {
+				debug("DEB SetConfiguration: registered capabilities[%d] = "BYTE_TO_BINARY_PATTERN, i, BYTE_TO_BINARY(((uint8_t *)codec->capabilities)[i]));
+				debug("DEB SetConfiguration: replied capabilities[%d]    = "BYTE_TO_BINARY_PATTERN, i, BYTE_TO_BINARY(((uint8_t *)data)[i]));
+			}
+
+#if FHG_DEBUG
+			a2dp_print_configuration(codec, data);
+#endif
+
 			if ((rv = a2dp_check_configuration(codec, data, size)) != A2DP_CHECK_OK) {
 				error("Invalid configuration: %s: %#x", "Invalid configuration blob", rv);
 				goto fail;
@@ -295,16 +330,17 @@ static void bluez_endpoint_set_configuration(GDBusMethodInvocation *inv) {
 	t->a2dp.bluez_dbus_sep_path = dbus_obj->path;
 	t->a2dp.delay = delay;
 
-	debug("%s configured for device %s",
+	debug("DEB %s configured for device %s",
 			ba_transport_type_to_string(t->type),
 			batostr_(&d->addr));
-	debug("Configuration: channels: %u, sampling: %u",
+	debug("DEB Configuration: channels: %u, sampling: %u",
 			t->a2dp.pcm.channels, t->a2dp.pcm.sampling);
 
 	ba_transport_set_a2dp_state(t, state);
 	dbus_obj->connected = true;
 
 	g_dbus_method_invocation_return_value(inv, NULL);
+	debug("DEEB start RegisterEndpoint in bluez_endpoint_set_configuration()");
 	bluez_register_a2dp_all(a);
 	goto final;
 
@@ -429,6 +465,15 @@ static int bluez_register_media_endpoint(
 	g_variant_builder_add(&properties, "{sv}", "Codec", g_variant_new_byte(codec->codec_id));
 	g_variant_builder_add(&properties, "{sv}", "Capabilities", g_variant_builder_end(&caps));
 
+	//####################################################################################
+	debug("DEEB RegisterEndpoint: UUID = %s", uuid);
+	debug("DEB RegisterEndpoint: Codec ID = %d (%s)", codec->codec_id, ba_transport_codecs_a2dp_to_string(codec->codec_id));
+	for (i = 0; i < codec->capabilities_size; i++) {
+		debug("DEEB RegisterEndpoint: Capabilities[%d] = "BYTE_TO_BINARY_PATTERN, i, BYTE_TO_BINARY(((uint8_t *)codec->capabilities)[i]));
+	}
+	//####################################################################################
+
+
 	g_dbus_message_set_body(msg, g_variant_new("(oa{sv})", dbus_obj->path, &properties));
 	g_variant_builder_clear(&properties);
 
@@ -527,11 +572,17 @@ static void bluez_register_a2dp(
 		if (dbus_obj->connected)
 			connected++;
 
+		debug("DEEB RegisterEndpoint: connected = %d", dbus_obj->connected);
+		debug("DEEB RegisterEndpoint: registered = %d", dbus_obj->registered);
+		debug("DEEB RegisterEndpoint: num connected = %d", connected);
+		debug("DEEB RegisterEndpoint: num registered = %d", registered);
+		debug("DEEB RegisterEndpoint: ###############");
+
 		continue;
 
 fail:
 		if (err != NULL) {
-			warn("Couldn't register media endpoint: %s", err->message);
+			warn("DEB Couldn't register media endpoint: %s", err->message);
 			g_error_free(err);
 		}
 	}
@@ -545,9 +596,11 @@ fail:
 static void bluez_register_a2dp_all(struct ba_adapter *adapter) {
 
 	const struct a2dp_codec **cc = a2dp_codecs;
+	int numCodecs = 0;
 
 	while (*cc != NULL) {
 		const struct a2dp_codec *c = *cc++;
+		debug("DEEB RegisterEndpoint: ########## A2DP codec #%d ##########", numCodecs++);
 		switch (c->dir) {
 		case A2DP_SOURCE:
 			if (config.enable.a2dp_source)
@@ -908,6 +961,7 @@ void bluez_register(void) {
 			bluez_adapters[a->hci.dev_id].adapter = a;
 			bluez_adapters[a->hci.dev_id].device_sep_map = g_hash_table_new_full(
 					g_bdaddr_hash, g_bdaddr_equal, g_free, (GDestroyNotify)bluez_sep_array_free);
+			debug("DEEB start RegisterEndpoint in adapter loop - bluez_register()");
 			bluez_register_a2dp_all(a);
 		}
 
@@ -979,6 +1033,7 @@ static void bluez_signal_interfaces_added(GDBusConnection *conn, const char *sen
 		bluez_adapters[a->hci.dev_id].adapter = a;
 		bluez_adapters[a->hci.dev_id].device_sep_map = g_hash_table_new_full(
 				g_bdaddr_hash, g_bdaddr_equal, g_free, (GDestroyNotify)bluez_sep_array_free);
+		debug("DEEB start RegisterEndpoint in adapter loop - bluez_signal_interfaces_added()");
 		bluez_register_a2dp_all(a);
 	}
 
@@ -1002,7 +1057,7 @@ static void bluez_signal_interfaces_added(GDBusConnection *conn, const char *sen
 			sep.codec_id = a2dp_get_vendor_codec_id(sep.capabilities, sep.capabilities_size);
 		sep.configuration = g_malloc(sep.capabilities_size);
 
-		debug("Adding new Stream End-Point: %s: %s", batostr_(&addr),
+		debug("DEB Adding new Stream End-Point: %s: %s", batostr_(&addr),
 				ba_transport_codecs_a2dp_to_string(sep.codec_id));
 		g_array_append_val(seps, sep);
 
