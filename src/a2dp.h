@@ -124,4 +124,10 @@ int a2dp_select_configuration(
 		void *capabilities,
 		size_t size);
 
+#if FHG_DEBUG
+void a2dp_print_configuration(
+		const struct a2dp_codec *codec,
+		const void *capabilities);
+#endif
+
 #endif

@@ -22,6 +22,9 @@
 #include "sbc.h"
 #include "shared/defs.h"
 #include "shared/log.h"
+#if FHG_DEBUG
+#include "utils.h"
+#endif
 
 static const a2dp_sbc_t a2dp_sbc = {
 	.frequency =
@@ -1041,6 +1044,129 @@ static unsigned int a2dp_codec_select_sampling_freq(
 
 	return 0;
 }
+
+#if FHG_DEBUG
+static unsigned int a2dp_sampling_frequency_index2value(
+		const uint32_t frequency_index,
+		const struct a2dp_codec *codec
+		) {
+
+	int i;
+	unsigned int frequency_value = 0;
+
+	for (i = 0; i < codec->samplings_size[0]; i++) {
+		if (frequency_index == codec->samplings[0][i].value) {
+			frequency_value = codec->samplings[0][i].frequency;
+			break;
+		}
+	}
+
+	return frequency_value;
+}
+
+static unsigned int a2dp_channels_index2value(
+		const uint32_t channel_index,
+		const struct a2dp_codec *codec
+		) {
+
+	int i;
+	unsigned int channel_value = 0;
+
+	for (i = 0; i < codec->channels_size[0]; i++) {
+		if (channel_index == codec->channels[0][i].value) {
+			channel_value = codec->channels[0][i].channels;
+			break;
+		}
+	}
+
+	return channel_value;
+}
+
+void a2dp_print_configuration(
+		const struct a2dp_codec *codec,
+		const void *capabilities) {
+
+	debug("DEB ############### Configuration ###############");
+
+	switch (codec->codec_id) {
+
+#if ENABLE_AAC
+	case A2DP_CODEC_MPEG24: {
+
+		const a2dp_aac_t *cap = capabilities;
+		unsigned int cap_chm = a2dp_channels_index2value(cap->channels, codec);
+		unsigned int cap_freq = a2dp_sampling_frequency_index2value(AAC_GET_FREQUENCY(*cap), codec);
+		unsigned int cap_br = AAC_GET_BITRATE(*cap);
+		char *objType = "UNKNOWN";
+		char *cap_drc = "UNKNOWN";
+		char *cap_vbr = "UNKNOWN";
+
+		if (cap->object_type & AAC_OBJECT_TYPE_MPEG2_AAC_LC)
+			objType = "MPEG-2 AAC LC";
+		else if (cap->object_type & AAC_OBJECT_TYPE_MPEG4_AAC_LC)
+			objType = "MPEG-4 AAC LC";
+		else if (cap->object_type & AAC_OBJECT_TYPE_MPEG4_AAC_LTP)
+			objType = "MPEG-4 AAC LTP";
+		else if (cap->object_type & AAC_OBJECT_TYPE_MPEG4_AAC_SCA)
+			objType = "MPEG-4 AAC scalable";	
+#if FHG_HEAAC_IN_A2DP
+		else if (cap->object_type & AAC_OBJECT_TYPE_MPEG4_HEAAC)
+			objType = "MPEG-4 HE-AAC";
+		else if (cap->object_type & AAC_OBJECT_TYPE_MPEG4_HEAACV2)
+			objType = "MPEG-4 HE-AACv2";
+		else if (cap->object_type & AAC_OBJECT_TYPE_MPEG4_ELDV2)
+			objType = "MPEG-4 AAC-ELDv2";
+#endif
+
+#if FHG_HEAAC_IN_A2DP
+		cap_drc = cap->drc ? "on" : "off";
+#endif
+		cap_vbr = cap->vbr ? "on" : "off";
+
+		debug("DEB # Codec ID = %d (%s)", codec->codec_id, ba_transport_codecs_a2dp_to_string(codec->codec_id));
+		debug("DEB # Object Type = %s", objType);
+		debug("DEB # Channels = %d", cap_chm);
+		debug("DEB # Sampling Frequency = %d Hz", cap_freq);
+		debug("DEB # Bitrate = %d bps", cap_br);
+		debug("DEB # VBR %s", cap_vbr);
+		debug("DEB # DRC %s", cap_drc);
+		
+		break;
+	}
+#endif
+
+#if FHG_USAC_IN_A2DP
+#if ENABLE_USAC
+	case A2DP_CODEC_MPEGD: {
+
+		const a2dp_usac_t *cap = capabilities;
+		unsigned int cap_chm = a2dp_channels_index2value(cap->channels, codec);
+		unsigned int cap_freq = a2dp_sampling_frequency_index2value(USAC_GET_FREQUENCY(*cap), codec);
+		unsigned int cap_br = USAC_GET_BITRATE(*cap);
+		char *objType = "UNKNOWN";
+		char *cap_vbr = "UNKNOWN";
+
+		if (cap->object_type & USAC_OBJECT_TYPE_MPEGD_USAC_WITH_DRC)
+			objType = "MPEG-D USAC with MPEG-D DRC";
+
+		cap_vbr = cap->vbr ? "on" : "off";
+
+		debug("DEB # Codec ID           = %d (%s)", codec->codec_id, ba_transport_codecs_a2dp_to_string(codec->codec_id));
+		debug("DEB # Object Type        = %s", objType);
+		debug("DEB # Channels           = %d", cap_chm);
+		debug("DEB # Sampling Frequency = %d Hz", cap_freq);
+		debug("DEB # Bitrate            = %d bps", cap_br);
+		debug("DEB # VBR %s", cap_vbr);
+
+		break;
+	}
+#endif
+#endif /* FHG_USAC_IN_A2DP */
+	}
+
+	debug("DEB #############################################");
+}
+#endif /* FHG_DEBUG */
 
 /**
  * Select (best) A2DP codec configuration. */
