@@ -74,6 +74,7 @@ struct ba_config config = {
 	.a2dp.force_mono = false,
 	.a2dp.force_44100 = false,
 	.a2dp.keep_alive = 0,
+	.a2dp.skip_encoding = false,
 
 	/* Try to use high SBC encoding quality as a default. */
 	.sbc_quality = SBC_QUALITY_HIGH,

@@ -101,6 +101,7 @@ int main(int argc, char **argv) {
 		{ "a2dp-force-audio-cd", no_argument, NULL, 7 },
 		{ "a2dp-keep-alive", required_argument, NULL, 8 },
 		{ "a2dp-volume", no_argument, NULL, 9 },
+		{ "a2dp-skip-encoding", no_argument, NULL, 10 },
 		{ "sbc-quality", required_argument, NULL, 14 },
 #if ENABLE_AAC
 		{ "aac-afterburner", no_argument, NULL, 4 },
@@ -162,6 +163,7 @@ int main(int argc, char **argv) {
 					"  --a2dp-force-audio-cd\tforce 44.1 kHz sampling\n"
 					"  --a2dp-keep-alive=SEC\tkeep A2DP transport alive\n"
 					"  --a2dp-volume\t\tnative volume control by default\n"
+					"  --a2dp-skip-encoding\t\tskip encoding when using pre-encoded audio bitstreams\n"
 					"  --sbc-quality=NB\tset SBC encoder quality\n"
 #if ENABLE_AAC
 					"  --aac-afterburner\tenable FDK AAC afterburner\n"
@@ -254,6 +256,9 @@ int main(int argc, char **argv) {
 			break;
 		case 9 /* --a2dp-volume */ :
 			config.a2dp.volume = true;
+			break;
+		case 10 /* --a2dp-skip-encoding */ :
+			config.a2dp.skip_encoding = true;
 			break;
 
 		case 14 /* --sbc-quality=NB */ :

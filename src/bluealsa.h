@@ -98,6 +98,10 @@ struct ba_config {
 		 * time. This option applies for the source profile only. */
 		int keep_alive;
 
+		/* Skip the encoding if you want to use pre-encoded audio bitstreams as
+		 * input files. */
+		bool skip_encoding;
+
 	} a2dp;
 
 	/* BlueALSA supports 4 SBC qualities: low, medium, high and XQ. The XQ mode
