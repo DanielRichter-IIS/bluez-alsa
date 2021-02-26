@@ -361,7 +361,7 @@ static const a2dp_usac_t a2dp_usac = {
 		USAC_CHANNELS_1 |
 		USAC_CHANNELS_2,
 	.vbr = 1,
-	USAC_INIT_BITRATE(64000) /* TODO adjust init bitrate */
+	USAC_INIT_BITRATE(320000) /* TODO adjust init bitrate */
 };
 
 static const struct a2dp_channel_mode a2dp_usac_channels[] = {
