@@ -176,7 +176,8 @@ static const a2dp_aac_t a2dp_aac = { /* TODO add DRC flag? and multichannel */
 #if FHG_HEAAC_IN_A2DP
 		AAC_OBJECT_TYPE_MPEG4_AAC_LC |
 		AAC_OBJECT_TYPE_MPEG4_HEAAC |
-		AAC_OBJECT_TYPE_MPEG4_HEAACV2, /* TODO Add ELD */
+		AAC_OBJECT_TYPE_MPEG4_HEAACV2 |
+		AAC_OBJECT_TYPE_MPEG4_ELDV2,
 	.drc = 1,
 #else
 		AAC_OBJECT_TYPE_MPEG4_AAC_LC,
@@ -361,7 +362,7 @@ static const a2dp_usac_t a2dp_usac = {
 		USAC_CHANNELS_1 |
 		USAC_CHANNELS_2,
 	.vbr = 1,
-	USAC_INIT_BITRATE(64000) /* TODO adjust init bitrate */
+	USAC_INIT_BITRATE(320000)
 };
 
 static const struct a2dp_channel_mode a2dp_usac_channels[] = {
@@ -825,7 +826,8 @@ uint32_t a2dp_check_configuration(
 				cap->object_type != AAC_OBJECT_TYPE_MPEG4_AAC_LTP &&
 				cap->object_type != AAC_OBJECT_TYPE_MPEG4_AAC_SCA &&
 				cap->object_type != AAC_OBJECT_TYPE_MPEG4_HEAAC &&
-				cap->object_type != AAC_OBJECT_TYPE_MPEG4_HEAACV2) {
+				cap->object_type != AAC_OBJECT_TYPE_MPEG4_HEAACV2 &&
+				cap->object_type != AAC_OBJECT_TYPE_MPEG4_ELDV2) {
 #else
 		if (cap->object_type != AAC_OBJECT_TYPE_MPEG2_AAC_LC &&
 				cap->object_type != AAC_OBJECT_TYPE_MPEG4_AAC_LC &&
@@ -980,8 +982,8 @@ int a2dp_filter_capabilities(
 #if ENABLE_USAC
 	case A2DP_CODEC_MPEGD:
 		USAC_SET_BITRATE(*(a2dp_usac_t *)tmp, MIN(
-					USAC_GET_BITRATE(*(a2dp_usac_t *)capabilities),
-					USAC_GET_BITRATE(*(a2dp_usac_t *)codec->capabilities)));
+			USAC_GET_BITRATE(*(a2dp_usac_t *)capabilities),
+			USAC_GET_BITRATE(*(a2dp_usac_t *)codec->capabilities)));
 		break;
 #endif
 #endif /* FHG_USAC_IN_A2DP */
@@ -1011,6 +1013,18 @@ static unsigned int a2dp_codec_select_channel_mode(
 			capabilities & codec->channels[slot][0].value)
 		return codec->channels[slot][0].value;
 
+#if CODEC_CONFIG_PARAMETERS
+	if (config.a2dp.channelsIsSet){
+		for(i = 0; i< codec->channels_size[slot]; i++){
+			if (capabilities & codec->channels[slot][i].value) {
+				if (codec->channels[slot][i].channels == config.a2dp.channels) {
+					return codec->channels[slot][i].value;
+				}
+			}
+		}
+	}
+#endif
+
 	/* favor higher number of channels */
 	for (i = codec->channels_size[slot]; i > 0; i--)
 		if (capabilities & codec->channels[slot][i - 1].value)
@@ -1036,6 +1050,19 @@ static unsigned int a2dp_codec_select_sampling_freq(
 					return codec->samplings[slot][i].value;
 				break;
 			}
+
+#if CODEC_CONFIG_PARAMETERS
+	if (config.a2dp.samplingFrequencyIsSet) {
+		for (i = 0; i < codec->samplings_size[slot]; i++){
+			if (codec->samplings[slot][i].frequency == config.a2dp.samplingFrequency) {
+				if (capabilities & codec->samplings[slot][i].value) {
+					return codec->samplings[slot][i].value;
+				}
+				break;
+			}
+		}
+	}
+#endif
 
 	/* favor higher sampling frequencies */
 	for (i = codec->samplings_size[slot]; i > 0; i--)
@@ -1156,7 +1183,7 @@ void a2dp_print_configuration(
 		debug("DEB # Channels           = %d", cap_chm);
 		debug("DEB # Sampling Frequency = %d Hz", cap_freq);
 		debug("DEB # Bitrate            = %d bps", cap_br);
-		debug("DEB # VBR %s", cap_vbr);
+		debug("DEB # VBR %s",                      cap_vbr);
 
 		break;
 	}
@@ -1298,10 +1325,20 @@ int a2dp_select_configuration(
 			cap->object_type = AAC_OBJECT_TYPE_MPEG4_AAC_LC;
 		else if (cap->object_type & AAC_OBJECT_TYPE_MPEG2_AAC_LC)
 			cap->object_type = AAC_OBJECT_TYPE_MPEG2_AAC_LC;
+#if FHG_HEAAC_IN_A2DP
+		else if (cap->object_type & AAC_OBJECT_TYPE_MPEG4_ELDV2)
+			cap->object_type = AAC_OBJECT_TYPE_MPEG4_ELDV2;
+#endif
 		else {
 			error("AAC: No supported object type: %#x", cap->object_type);
 			goto fail;
 		}
+
+#if CODEC_CONFIG_PARAMETERS
+	if((config.a2dp.objectTypeIsSet == true)) {
+		cap->object_type = config.a2dp.objectTypeIndex;
+	}
+#endif
 
 		if ((cap->channels = a2dp_codec_select_channel_mode(codec, cap_chm, false)) == 0) {
 			error("AAC: No supported channels: %#x", cap_chm);
@@ -1316,9 +1353,27 @@ int a2dp_select_configuration(
 			goto fail;
 		}
 
-		if (AAC_GET_BITRATE(*cap) == 0)
-			AAC_SET_BITRATE(*cap, AAC_GET_BITRATE(*(a2dp_aac_t *)codec->capabilities));
+		/**********************BIT RATE*****************************/
+#if CODEC_CONFIG_PARAMETERS
+        if(config.a2dp.bitRateIsSet){
+			AAC_SET_BITRATE(*cap, config.a2dp.bitRate);
+		} else {
+#endif
+			if (AAC_GET_BITRATE(*cap) == 0)
+				AAC_SET_BITRATE(*cap, AAC_GET_BITRATE(*(a2dp_aac_t *)codec->capabilities));
+#if CODEC_CONFIG_PARAMETERS
+		}
 
+		/**********************VBR*****************************/
+		if(config.a2dp.vbrIsSet){
+			cap->vbr = config.a2dp.vbr;
+		}
+
+		/**********************DRC*****************************/
+		if(config.a2dp.drcIsSet){
+			cap->drc = config.a2dp.drc;
+		}
+#endif
 		break;
 	}
 #endif
@@ -1415,6 +1470,7 @@ int a2dp_select_configuration(
 		unsigned int cap_chm = cap->channels;
 		unsigned int cap_freq = USAC_GET_FREQUENCY(*cap);
 
+		/***********************OBJECT TYPE*****************************/
 		if (cap->object_type & USAC_OBJECT_TYPE_MPEGD_USAC_WITH_DRC)
 			cap->object_type = USAC_OBJECT_TYPE_MPEGD_USAC_WITH_DRC;
 		else {
@@ -1422,22 +1478,37 @@ int a2dp_select_configuration(
 			goto fail;
 		}
 
+		/**********************CHANNEL MODE*****************************/
 		if ((cap->channels = a2dp_codec_select_channel_mode(codec, cap_chm, false)) == 0) {
 			error("USAC: No supported channels: %#x", cap_chm);
 			goto fail;
 		}
 
+		/**********************SAMPLING FREQUENCIES*****************************/
 		unsigned int freq;
-		if ((freq = a2dp_codec_select_sampling_freq(codec, cap_freq, false)) != 0)
+		if ((freq = a2dp_codec_select_sampling_freq(codec, cap_freq, false)) != 0) {
 			USAC_SET_FREQUENCY(*cap, freq);
-		else {
+		} else {
 			error("USAC: No supported sampling frequencies: %#x", cap_freq);
 			goto fail;
 		}
 
-		if (USAC_GET_BITRATE(*cap) == 0)
-			USAC_SET_BITRATE(*cap, USAC_GET_BITRATE(*(a2dp_usac_t *)codec->capabilities));
+		/**********************BIT RATE*****************************/
+#if CODEC_CONFIG_PARAMETERS
+		if(config.a2dp.bitRateIsSet){
+			USAC_SET_BITRATE(*cap, config.a2dp.bitRate);
+		} else {
+#endif
+			if (USAC_GET_BITRATE(*cap) == 0)
+				USAC_SET_BITRATE(*cap, USAC_GET_BITRATE(*(a2dp_usac_t *)codec->capabilities));	
+#if CODEC_CONFIG_PARAMETERS
+		}
 
+		/**********************VBR*****************************/
+		if(config.a2dp.vbrIsSet){
+			cap->vbr = config.a2dp.vbr;
+		}
+#endif
 		break;
 	}
 #endif

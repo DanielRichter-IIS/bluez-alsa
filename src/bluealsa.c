@@ -75,7 +75,20 @@ struct ba_config config = {
 	.a2dp.force_44100 = false,
 	.a2dp.keep_alive = 0,
 	.a2dp.skip_encoding = false,
-
+#if CODEC_CONFIG_PARAMETERS
+	.a2dp.samplingFrequency = 48000,
+	.a2dp.samplingFrequencyIsSet = false,
+	.a2dp.bitRate = 64000,
+	.a2dp.bitRateIsSet = false,
+	.a2dp.channels = 2,
+	.a2dp.channelsIsSet = false,
+	.a2dp.vbr = 0,
+	.a2dp.vbrIsSet = false,
+	.a2dp.drc = 0,
+	.a2dp.drcIsSet = false,
+	.a2dp.objectType = 42,
+	.a2dp.objectTypeIsSet = false,
+#endif
 	/* Try to use high SBC encoding quality as a default. */
 	.sbc_quality = SBC_QUALITY_HIGH,
 

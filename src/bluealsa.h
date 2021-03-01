@@ -101,6 +101,21 @@ struct ba_config {
 		/* Skip the encoding if you want to use pre-encoded audio bitstreams as
 		 * input files. */
 		bool skip_encoding;
+#if CODEC_CONFIG_PARAMETERS
+		unsigned int samplingFrequency;
+		bool samplingFrequencyIsSet;
+		unsigned int bitRate;
+		bool bitRateIsSet;
+		unsigned int channels;
+		bool channelsIsSet;
+		unsigned int vbr;
+		bool vbrIsSet;
+		unsigned int drc;
+		bool drcIsSet;
+		unsigned int objectType;
+		uint8_t objectTypeIndex;
+		bool objectTypeIsSet;
+#endif
 
 	} a2dp;
 

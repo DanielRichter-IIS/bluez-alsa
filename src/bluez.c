@@ -598,19 +598,59 @@ static void bluez_register_a2dp_all(struct ba_adapter *adapter) {
 	const struct a2dp_codec **cc = a2dp_codecs;
 	int numCodecs = 0;
 
+#if CODEC_CONFIG_PARAMETERS
+	uint16_t codec_id_local;
+
+	/* MAP input to codec_id defines */
+	if((config.a2dp.objectTypeIsSet == true)) {
+		switch(config.a2dp.objectType) {
+			case 22:
+				config.a2dp.objectTypeIndex = AAC_OBJECT_TYPE_MPEG2_AAC_LC;
+				codec_id_local = A2DP_CODEC_MPEG24;
+				break;
+			case 24:
+				config.a2dp.objectTypeIndex = AAC_OBJECT_TYPE_MPEG4_AAC_LC;
+				codec_id_local = A2DP_CODEC_MPEG24;
+				break;
+			case 5:
+				config.a2dp.objectTypeIndex = AAC_OBJECT_TYPE_MPEG4_HEAAC;
+				codec_id_local = A2DP_CODEC_MPEG24;
+				break;
+			case 29:
+				config.a2dp.objectTypeIndex = AAC_OBJECT_TYPE_MPEG4_HEAACV2;
+				codec_id_local = A2DP_CODEC_MPEG24;
+				break;
+			case 39:
+				config.a2dp.objectTypeIndex = AAC_OBJECT_TYPE_MPEG4_ELDV2;
+				codec_id_local = A2DP_CODEC_MPEG24;
+				break;
+			case 42:
+				config.a2dp.objectTypeIndex = USAC_OBJECT_TYPE_MPEGD_USAC_WITH_DRC;
+				codec_id_local = A2DP_CODEC_MPEGD;
+				break;
+		}
+	}
+#endif
+
 	while (*cc != NULL) {
 		const struct a2dp_codec *c = *cc++;
 		debug("DEEB RegisterEndpoint: ########## A2DP codec #%d ##########", numCodecs++);
-		switch (c->dir) {
-		case A2DP_SOURCE:
-			if (config.enable.a2dp_source)
-				bluez_register_a2dp(adapter, c, BLUETOOTH_UUID_A2DP_SOURCE);
-			break;
-		case A2DP_SINK:
-			if (config.enable.a2dp_sink)
-				bluez_register_a2dp(adapter, c, BLUETOOTH_UUID_A2DP_SINK);
-			break;
+#if CODEC_CONFIG_PARAMETERS
+		if((config.a2dp.objectTypeIsSet == false) || (c->codec_id == A2DP_CODEC_SBC || c->codec_id == codec_id_local )){
+#endif
+			switch (c->dir) {
+			case A2DP_SOURCE:
+				if (config.enable.a2dp_source)
+					bluez_register_a2dp(adapter, c, BLUETOOTH_UUID_A2DP_SOURCE);
+				break;
+			case A2DP_SINK:
+				if (config.enable.a2dp_sink)
+					bluez_register_a2dp(adapter, c, BLUETOOTH_UUID_A2DP_SINK);
+				break;
+			}
+#if CODEC_CONFIG_PARAMETERS
 		}
+#endif
 	}
 
 }

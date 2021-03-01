@@ -182,7 +182,8 @@ static void dump_aac(const a2dp_aac_t *aac) {
 			aac->object_type & AAC_OBJECT_TYPE_MPEG2_AAC_LC ? " MPGE2-LC" : "",
 #if FHG_HEAAC_IN_A2DP
 			aac->object_type & AAC_OBJECT_TYPE_MPEG4_HEAAC ? " MPEG-4-HE-AAC" : "",
-			aac->object_type & AAC_OBJECT_TYPE_MPEG4_HEAACV2 ? " MPEG-4-HE-AACv2" : "", /* TODO Add ELD */
+			aac->object_type & AAC_OBJECT_TYPE_MPEG4_HEAACV2 ? " MPEG-4-HE-AACv2" : "",
+			aac->object_type & AAC_OBJECT_TYPE_MPEG4_ELDV2 ? " MPEG-4-ELDv2" : "",
 			aac->drc ? "true" : "false",
 #endif
 			AAC_GET_FREQUENCY(*aac) & AAC_SAMPLING_FREQ_96000 ? " 96000" : "",

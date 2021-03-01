@@ -294,8 +294,8 @@
 
 #define USAC_SET_BITRATE(a, b) \
 	do { \
-		(a).bitrate1 = (b >> 16) & 0x7f; \
-		(a).bitrate2 = (b >> 8) & 0xff; \
+		(a).bitrate1 = ((b) >> 16) & 0x7f; \
+		(a).bitrate2 = ((b) >> 8) & 0xff; \
 		(a).bitrate3 = (b) & 0xff; \
 	} while (0)
 #define USAC_SET_FREQUENCY(a, f) \
@@ -307,8 +307,8 @@
 	} while (0)
 
 #define USAC_INIT_BITRATE(b) \
-	.bitrate1 = (b >> 16) & 0x7f, \
-	.bitrate2 = (b >> 8) & 0xff, \
+	.bitrate1 = ((b) >> 16) & 0x7f, \
+	.bitrate2 = ((b) >> 8) & 0xff, \
 	.bitrate3 = (b) & 0xff,
 #define USAC_INIT_FREQUENCY(f) \
 	.frequency1 = (f >> 20) & 0x3f, \

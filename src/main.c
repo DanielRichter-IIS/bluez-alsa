@@ -101,7 +101,15 @@ int main(int argc, char **argv) {
 		{ "a2dp-force-audio-cd", no_argument, NULL, 7 },
 		{ "a2dp-keep-alive", required_argument, NULL, 8 },
 		{ "a2dp-volume", no_argument, NULL, 9 },
-		{ "a2dp-skip-encoding", no_argument, NULL, 10 },
+		{ "a2dp-skip-encoding", no_argument, NULL, 20},
+#if CODEC_CONFIG_PARAMETERS
+		{ "a2dp-samplingFrequency", required_argument, NULL, 21},
+		{ "a2dp-bitRate", required_argument, NULL, 22},
+		{ "a2dp-channels", required_argument, NULL, 23},
+		{ "a2dp-vbr", required_argument, NULL, 24},
+		{ "a2dp-drc", required_argument, NULL, 25},
+		{ "a2dp-objectType", required_argument, NULL, 26},
+#endif	
 		{ "sbc-quality", required_argument, NULL, 14 },
 #if ENABLE_AAC
 		{ "aac-afterburner", no_argument, NULL, 4 },
@@ -188,6 +196,23 @@ int main(int argc, char **argv) {
 					"  - hfp-ag\tHands-Free Audio Gateway (%s)\n"
 					"  - hsp-hs\tHeadset (%s)\n"
 					"  - hsp-ag\tHeadset Audio Gateway (%s)\n"
+#if CODEC_CONFIG_PARAMETERS
+					"\n"
+					"The following options are used for the configuration selection\n"
+					"for the interoperability testing.\n"
+					"  --a2dp-samplingFrequency [int] \t Sampling Frequency (E.g. 48000) \n"
+					"  --a2dp-bitRate [int] \t Bit Rate (E.g. 64000) \n"
+					"  --a2dp-channels [int] \t Number of channels \n (E.g. 1 for mono; 2 for stereo; 6 for 5.1; 8 for 7.1))\n"
+					"  --a2dp-vbr [int] \t Enable(1) or disable(0) VBR mode\n"
+					"  --a2dp-drc [int] \t Enable(1) or disable(0) DRC mode\n"
+					"  --a2dp-objectType [int] \t Object type \n "
+					"      22 : MPEG-2 AAC LC                 \n"
+					"      24 : MPEG-4 AAC LC                 \n"
+					"      5  : MPEG-4 HE-AAC                 \n"
+					"      29 : MPEG-4 HE-AACv2               \n"
+					"      39 : MPEG-4 AAC-ELDv2              \n"
+					"      42 : MPEG-D USAC with MPEG-D DRC   \n"
+#endif
 					"\n"
 					"By default only output profiles are enabled, which includes A2DP Source and\n"
 					"HSP/HFP Audio Gateways. If one wants to enable other set of profiles, it is\n"
@@ -257,10 +282,35 @@ int main(int argc, char **argv) {
 		case 9 /* --a2dp-volume */ :
 			config.a2dp.volume = true;
 			break;
-		case 10 /* --a2dp-skip-encoding */ :
+		case 20 /* --a2dp-skip-encoding */ :
 			config.a2dp.skip_encoding = true;
 			break;
-
+#if CODEC_CONFIG_PARAMETERS
+		case 21 /* --a2dp-samplingFrequency */ :
+			config.a2dp.samplingFrequency = atoi(optarg);
+			config.a2dp.samplingFrequencyIsSet = true;
+			break;
+		case 22 /* --a2dp-bitRate */ :
+			config.a2dp.bitRate = atoi(optarg);
+			config.a2dp.bitRateIsSet = true;
+			break;
+		case 23 /* --a2dp-channels */ :
+			config.a2dp.channels = atoi(optarg);
+			config.a2dp.channelsIsSet = true;
+			break;
+		case 24 /* --a2dp-vbr */ :
+			config.a2dp.vbr = atoi(optarg);
+			config.a2dp.vbrIsSet = true;
+			break;
+		case 25 /* --a2dp-drc */ :
+			config.a2dp.drc = atoi(optarg);
+			config.a2dp.drcIsSet = true;
+			break;
+		case 26 /* --a2dp-objectType */ :
+			config.a2dp.objectType = atoi(optarg);
+			config.a2dp.objectTypeIsSet = true;
+			break;
+#endif
 		case 14 /* --sbc-quality=NB */ :
 			config.sbc_quality = atoi(optarg);
 			if (config.sbc_quality > SBC_QUALITY_XQ) {
