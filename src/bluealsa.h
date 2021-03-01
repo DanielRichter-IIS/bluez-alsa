@@ -101,7 +101,7 @@ struct ba_config {
 		/* Skip the encoding if you want to use pre-encoded audio bitstreams as
 		 * input files. */
 		bool skip_encoding;
-#if CODEC_CONFIG_PARAMETERS
+#if CODEC_CONFIG_PARAMETERS_INTEROP_TESTING
 		unsigned int samplingFrequency;
 		bool samplingFrequencyIsSet;
 		unsigned int bitRate;

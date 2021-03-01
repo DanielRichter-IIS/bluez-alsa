@@ -75,7 +75,7 @@ struct ba_config config = {
 	.a2dp.force_44100 = false,
 	.a2dp.keep_alive = 0,
 	.a2dp.skip_encoding = false,
-#if CODEC_CONFIG_PARAMETERS
+#if CODEC_CONFIG_PARAMETERS_INTEROP_TESTING
 	.a2dp.samplingFrequency = 48000,
 	.a2dp.samplingFrequencyIsSet = false,
 	.a2dp.bitRate = 64000,

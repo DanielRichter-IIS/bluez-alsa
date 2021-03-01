@@ -1013,7 +1013,7 @@ static unsigned int a2dp_codec_select_channel_mode(
 			capabilities & codec->channels[slot][0].value)
 		return codec->channels[slot][0].value;
 
-#if CODEC_CONFIG_PARAMETERS
+#if CODEC_CONFIG_PARAMETERS_INTEROP_TESTING
 	if (config.a2dp.channelsIsSet){
 		for(i = 0; i< codec->channels_size[slot]; i++){
 			if (capabilities & codec->channels[slot][i].value) {
@@ -1051,7 +1051,7 @@ static unsigned int a2dp_codec_select_sampling_freq(
 				break;
 			}
 
-#if CODEC_CONFIG_PARAMETERS
+#if CODEC_CONFIG_PARAMETERS_INTEROP_TESTING
 	if (config.a2dp.samplingFrequencyIsSet) {
 		for (i = 0; i < codec->samplings_size[slot]; i++){
 			if (codec->samplings[slot][i].frequency == config.a2dp.samplingFrequency) {
@@ -1334,7 +1334,7 @@ int a2dp_select_configuration(
 			goto fail;
 		}
 
-#if CODEC_CONFIG_PARAMETERS
+#if CODEC_CONFIG_PARAMETERS_INTEROP_TESTING
 	if((config.a2dp.objectTypeIsSet == true)) {
 		cap->object_type = config.a2dp.objectTypeIndex;
 	}
@@ -1354,14 +1354,14 @@ int a2dp_select_configuration(
 		}
 
 		/**********************BIT RATE*****************************/
-#if CODEC_CONFIG_PARAMETERS
+#if CODEC_CONFIG_PARAMETERS_INTEROP_TESTING
         if(config.a2dp.bitRateIsSet){
 			AAC_SET_BITRATE(*cap, config.a2dp.bitRate);
 		} else {
 #endif
 			if (AAC_GET_BITRATE(*cap) == 0)
 				AAC_SET_BITRATE(*cap, AAC_GET_BITRATE(*(a2dp_aac_t *)codec->capabilities));
-#if CODEC_CONFIG_PARAMETERS
+#if CODEC_CONFIG_PARAMETERS_INTEROP_TESTING
 		}
 
 		/**********************VBR*****************************/
@@ -1494,14 +1494,14 @@ int a2dp_select_configuration(
 		}
 
 		/**********************BIT RATE*****************************/
-#if CODEC_CONFIG_PARAMETERS
+#if CODEC_CONFIG_PARAMETERS_INTEROP_TESTING
 		if(config.a2dp.bitRateIsSet){
 			USAC_SET_BITRATE(*cap, config.a2dp.bitRate);
 		} else {
 #endif
 			if (USAC_GET_BITRATE(*cap) == 0)
 				USAC_SET_BITRATE(*cap, USAC_GET_BITRATE(*(a2dp_usac_t *)codec->capabilities));	
-#if CODEC_CONFIG_PARAMETERS
+#if CODEC_CONFIG_PARAMETERS_INTEROP_TESTING
 		}
 
 		/**********************VBR*****************************/

@@ -598,7 +598,7 @@ static void bluez_register_a2dp_all(struct ba_adapter *adapter) {
 	const struct a2dp_codec **cc = a2dp_codecs;
 	int numCodecs = 0;
 
-#if CODEC_CONFIG_PARAMETERS
+#if CODEC_CONFIG_PARAMETERS_INTEROP_TESTING
 	uint16_t codec_id_local;
 
 	/* MAP input to codec_id defines */
@@ -635,7 +635,7 @@ static void bluez_register_a2dp_all(struct ba_adapter *adapter) {
 	while (*cc != NULL) {
 		const struct a2dp_codec *c = *cc++;
 		debug("DEEB RegisterEndpoint: ########## A2DP codec #%d ##########", numCodecs++);
-#if CODEC_CONFIG_PARAMETERS
+#if CODEC_CONFIG_PARAMETERS_INTEROP_TESTING
 		if((config.a2dp.objectTypeIsSet == false) || (c->codec_id == A2DP_CODEC_SBC || c->codec_id == codec_id_local )){
 #endif
 			switch (c->dir) {
@@ -648,7 +648,7 @@ static void bluez_register_a2dp_all(struct ba_adapter *adapter) {
 					bluez_register_a2dp(adapter, c, BLUETOOTH_UUID_A2DP_SINK);
 				break;
 			}
-#if CODEC_CONFIG_PARAMETERS
+#if CODEC_CONFIG_PARAMETERS_INTEROP_TESTING
 		}
 #endif
 	}

@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
 		{ "a2dp-keep-alive", required_argument, NULL, 8 },
 		{ "a2dp-volume", no_argument, NULL, 9 },
 		{ "a2dp-skip-encoding", no_argument, NULL, 20},
-#if CODEC_CONFIG_PARAMETERS
+#if CODEC_CONFIG_PARAMETERS_INTEROP_TESTING
 		{ "a2dp-samplingFrequency", required_argument, NULL, 21},
 		{ "a2dp-bitRate", required_argument, NULL, 22},
 		{ "a2dp-channels", required_argument, NULL, 23},
@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
 					"  - hfp-ag\tHands-Free Audio Gateway (%s)\n"
 					"  - hsp-hs\tHeadset (%s)\n"
 					"  - hsp-ag\tHeadset Audio Gateway (%s)\n"
-#if CODEC_CONFIG_PARAMETERS
+#if CODEC_CONFIG_PARAMETERS_INTEROP_TESTING
 					"\n"
 					"The following options are used for the configuration selection\n"
 					"for the interoperability testing.\n"
@@ -285,7 +285,7 @@ int main(int argc, char **argv) {
 		case 20 /* --a2dp-skip-encoding */ :
 			config.a2dp.skip_encoding = true;
 			break;
-#if CODEC_CONFIG_PARAMETERS
+#if CODEC_CONFIG_PARAMETERS_INTEROP_TESTING
 		case 21 /* --a2dp-samplingFrequency */ :
 			config.a2dp.samplingFrequency = atoi(optarg);
 			config.a2dp.samplingFrequencyIsSet = true;
