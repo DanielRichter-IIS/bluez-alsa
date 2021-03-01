@@ -300,9 +300,9 @@
 	} while (0)
 #define USAC_SET_FREQUENCY(a, f) \
 	do { \
-		(a).frequency1 = (f >> 20) & 0x3f; \
-		(a).frequency2 = (f >> 12) & 0xff; \
-		(a).frequency3 = (f >> 4) & 0xff; \
+		(a).frequency1 = ((f) >> 20) & 0x3f; \
+		(a).frequency2 = ((f) >> 12) & 0xff; \
+		(a).frequency3 = ((f) >> 4) & 0xff; \
 		(a).frequency4 = (f) & 0x0f; \
 	} while (0)
 
@@ -311,9 +311,9 @@
 	.bitrate2 = ((b) >> 8) & 0xff, \
 	.bitrate3 = (b) & 0xff,
 #define USAC_INIT_FREQUENCY(f) \
-	.frequency1 = (f >> 20) & 0x3f, \
-	.frequency2 = (f >> 12) & 0xff, \
-	.frequency3 = (f >> 4) & 0xff, \
+	.frequency1 = ((f) >> 20) & 0x3f, \
+	.frequency2 = ((f) >> 12) & 0xff, \
+	.frequency3 = ((f) >> 4) & 0xff, \
 	.frequency4 = (f) & 0x0f,
 #endif /* FHG_USAC_IN_A2DP */
 
