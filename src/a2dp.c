@@ -362,7 +362,7 @@ static const a2dp_usac_t a2dp_usac = {
 		USAC_CHANNELS_1 |
 		USAC_CHANNELS_2,
 	.vbr = 1,
-	USAC_INIT_BITRATE(320000)
+	USAC_INIT_BITRATE(320000) /*Highest supported br*/
 };
 
 static const struct a2dp_channel_mode a2dp_usac_channels[] = {
