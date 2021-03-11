@@ -10,6 +10,8 @@
 
 #include "a2dp-audio.h"
 
+//#define FHG_BS_STREAM_DEBUG
+
 #include <ctype.h>
 #include <endian.h>
 #include <errno.h>
@@ -57,6 +59,19 @@
 #include "shared/ffb.h"
 #include "shared/log.h"
 #include "shared/rt.h"
+
+#ifdef FHG_BS_STREAM_DEBUG
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(byte)  \
+  (byte & 0x80 ? '1' : '0'), \
+  (byte & 0x40 ? '1' : '0'), \
+  (byte & 0x20 ? '1' : '0'), \
+  (byte & 0x10 ? '1' : '0'), \
+  (byte & 0x08 ? '1' : '0'), \
+  (byte & 0x04 ? '1' : '0'), \
+  (byte & 0x02 ? '1' : '0'), \
+  (byte & 0x01 ? '1' : '0')
+#endif // FHG_BS_STREAM_DEBUG
 
 /**
  * Common IO thread data. */
@@ -1339,76 +1354,78 @@ static void *a2dp_source_aac(struct ba_transport *t) {
 
 	pthread_cleanup_push(PTHREAD_CLEANUP(aacEncClose), &handle);
 
-	unsigned int aot = AOT_NONE;
-	unsigned int channelmode = channels == 1 ? MODE_1 : MODE_2;
+	//if (config.a2dp.skip_encoding == false || true) {
+		unsigned int aot = AOT_NONE;
+		unsigned int channelmode = channels == 1 ? MODE_1 : MODE_2;
 
-	switch (configuration->object_type) {
-	case AAC_OBJECT_TYPE_MPEG2_AAC_LC:
+		switch (configuration->object_type) {
+		case AAC_OBJECT_TYPE_MPEG2_AAC_LC:
 #if AACENCODER_LIB_VERSION <= 0x03040C00 /* 3.4.12 */ || \
 		AACENCODER_LIB_VERSION >= 0x04000000 /* 4.0.0 */
-		aot = AOT_MP2_AAC_LC;
-		break;
+			aot = AOT_MP2_AAC_LC;
+			break;
 #endif
-	case AAC_OBJECT_TYPE_MPEG4_AAC_LC:
-		aot = AOT_AAC_LC;
-		break;
-	case AAC_OBJECT_TYPE_MPEG4_AAC_LTP:
-		aot = AOT_AAC_LTP;
-		break;
-	case AAC_OBJECT_TYPE_MPEG4_AAC_SCA:
-		aot = AOT_AAC_SCAL;
-		break;
-	}
+		case AAC_OBJECT_TYPE_MPEG4_AAC_LC:
+			aot = AOT_AAC_LC;
+			break;
+		case AAC_OBJECT_TYPE_MPEG4_AAC_LTP:
+			aot = AOT_AAC_LTP;
+			break;
+		case AAC_OBJECT_TYPE_MPEG4_AAC_SCA:
+			aot = AOT_AAC_SCAL;
+			break;
+		}
 
-	if ((err = aacEncoder_SetParam(handle, AACENC_AOT, aot)) != AACENC_OK) {
-		error("Couldn't set audio object type: %s", aacenc_strerror(err));
-		goto fail_init;
-	}
-	if ((err = aacEncoder_SetParam(handle, AACENC_BITRATE, bitrate)) != AACENC_OK) {
-		error("Couldn't set bitrate: %s", aacenc_strerror(err));
-		goto fail_init;
-	}
-	if ((err = aacEncoder_SetParam(handle, AACENC_SAMPLERATE, samplerate)) != AACENC_OK) {
-		error("Couldn't set sampling rate: %s", aacenc_strerror(err));
-		goto fail_init;
-	}
-	if ((err = aacEncoder_SetParam(handle, AACENC_CHANNELMODE, channelmode)) != AACENC_OK) {
-		error("Couldn't set channel mode: %s", aacenc_strerror(err));
-		goto fail_init;
-	}
-	if (configuration->vbr) {
-		if ((err = aacEncoder_SetParam(handle, AACENC_BITRATEMODE, config.aac_vbr_mode)) != AACENC_OK) {
-			error("Couldn't set VBR bitrate mode %u: %s", config.aac_vbr_mode, aacenc_strerror(err));
+		if ((err = aacEncoder_SetParam(handle, AACENC_AOT, aot)) != AACENC_OK) {
+			error("Couldn't set audio object type: %s", aacenc_strerror(err));
 			goto fail_init;
 		}
-	}
-	if ((err = aacEncoder_SetParam(handle, AACENC_AFTERBURNER, config.aac_afterburner)) != AACENC_OK) {
-		error("Couldn't enable afterburner: %s", aacenc_strerror(err));
-		goto fail_init;
-	}
-	if ((err = aacEncoder_SetParam(handle, AACENC_TRANSMUX, TT_MP4_LATM_MCP1)) != AACENC_OK) {
-		error("Couldn't enable LATM transport type: %s", aacenc_strerror(err));
-		goto fail_init;
-	}
-	if ((err = aacEncoder_SetParam(handle, AACENC_HEADER_PERIOD, 1)) != AACENC_OK) {
-		error("Couldn't set LATM header period: %s", aacenc_strerror(err));
-		goto fail_init;
-	}
+		if ((err = aacEncoder_SetParam(handle, AACENC_BITRATE, bitrate)) != AACENC_OK) {
+			error("Couldn't set bitrate: %s", aacenc_strerror(err));
+			goto fail_init;
+		}
+		if ((err = aacEncoder_SetParam(handle, AACENC_SAMPLERATE, samplerate)) != AACENC_OK) {
+			error("Couldn't set sampling rate: %s", aacenc_strerror(err));
+			goto fail_init;
+		}
+		if ((err = aacEncoder_SetParam(handle, AACENC_CHANNELMODE, channelmode)) != AACENC_OK) {
+			error("Couldn't set channel mode: %s", aacenc_strerror(err));
+			goto fail_init;
+		}
+		if (configuration->vbr) {
+			if ((err = aacEncoder_SetParam(handle, AACENC_BITRATEMODE, config.aac_vbr_mode)) != AACENC_OK) {
+				error("Couldn't set VBR bitrate mode %u: %s", config.aac_vbr_mode, aacenc_strerror(err));
+				goto fail_init;
+			}
+		}
+		if ((err = aacEncoder_SetParam(handle, AACENC_AFTERBURNER, config.aac_afterburner)) != AACENC_OK) {
+			error("Couldn't enable afterburner: %s", aacenc_strerror(err));
+			goto fail_init;
+		}
+		if ((err = aacEncoder_SetParam(handle, AACENC_TRANSMUX, TT_MP4_LATM_MCP1)) != AACENC_OK) {
+			error("Couldn't enable LATM transport type: %s", aacenc_strerror(err));
+			goto fail_init;
+		}
+		if ((err = aacEncoder_SetParam(handle, AACENC_HEADER_PERIOD, 1)) != AACENC_OK) {
+			error("Couldn't set LATM header period: %s", aacenc_strerror(err));
+			goto fail_init;
+		}
 #if AACENCODER_LIB_VERSION >= 0x03041600 /* 3.4.22 */
-	if ((err = aacEncoder_SetParam(handle, AACENC_AUDIOMUXVER, config.aac_latm_version)) != AACENC_OK) {
-		error("Couldn't set LATM version: %s", aacenc_strerror(err));
-		goto fail_init;
-	}
+		if ((err = aacEncoder_SetParam(handle, AACENC_AUDIOMUXVER, config.aac_latm_version)) != AACENC_OK) {
+			error("Couldn't set LATM version: %s", aacenc_strerror(err));
+			goto fail_init;
+		}
 #endif
 
-	if ((err = aacEncEncode(handle, NULL, NULL, NULL, NULL)) != AACENC_OK) {
-		error("Couldn't initialize AAC encoder: %s", aacenc_strerror(err));
-		goto fail_init;
-	}
-	if ((err = aacEncInfo(handle, &aacinf)) != AACENC_OK) {
-		error("Couldn't get encoder info: %s", aacenc_strerror(err));
-		goto fail_init;
-	}
+		if ((err = aacEncEncode(handle, NULL, NULL, NULL, NULL)) != AACENC_OK) {
+			error("Couldn't initialize AAC encoder: %s", aacenc_strerror(err));
+			goto fail_init;
+		}
+		if ((err = aacEncInfo(handle, &aacinf)) != AACENC_OK) {
+			error("Couldn't get encoder info: %s", aacenc_strerror(err));
+			goto fail_init;
+		}
+	//}
 
 	ffb_t bt = { 0 };
 	ffb_t pcm = { 0 };
@@ -1422,6 +1439,23 @@ static void *a2dp_source_aac(struct ba_transport *t) {
 		goto fail_ffb;
 	}
 
+#ifdef FHG_BS_STREAM_DEBUG
+	// IDEA: print t->a2dp.pcm.format / sample_size (expected: uint8_t ?), aacinf.inputChannels, aacinf.frameLength and aacinf.maxOutBufBytes
+	debug("RIC t->a2dp.pcm.format = %u", t->a2dp.pcm.format);
+	debug("RIC sample_size           = %u bytes", sample_size);
+	debug("RIC t->a2dp.pcm.channels  = %u", t->a2dp.pcm.channels);
+	debug("RIC t->a2dp.pcm.sampling  = %u", t->a2dp.pcm.sampling);
+	debug("RIC num inPcmBuf elements (aacinf.inputChannels * aacinf.frameLength)  = %u", aacinf.inputChannels * aacinf.frameLength);
+	debug("RIC sizeof(uint8_t)       = %u bytes", sizeof(uint8_t));
+	debug("RIC aacinf.inputChannels  = %u", aacinf.inputChannels);
+	debug("RIC aacinf.frameLength    = %u", aacinf.frameLength);
+	debug("RIC aacinf.maxOutBufBytes = %u", aacinf.maxOutBufBytes);
+	debug("RIC RTP_HEADER_LEN = %u", (unsigned int)RTP_HEADER_LEN);
+	debug("RIC num outPcmBuf elements (RTP_HEADER_LEN + aacinf.maxOutBufBytes) = %u", RTP_HEADER_LEN + aacinf.maxOutBufBytes);
+	debug("RIC pcm.nmemb = %u (number of elements)", pcm.nmemb);
+	debug("RIC pcm.size  = %u (size of each element in bytes)", pcm.size);
+#endif
+
 	pthread_cleanup_push(PTHREAD_CLEANUP(ba_transport_pthread_cleanup_lock), t);
 
 	rtp_header_t *rtp_header;
@@ -1431,7 +1465,7 @@ static void *a2dp_source_aac(struct ba_transport *t) {
 	uint16_t seq_number = be16toh(rtp_header->seq_number);
 	uint32_t timestamp = be32toh(rtp_header->timestamp);
 
-	int in_bufferIdentifiers[] = { IN_AUDIO_DATA };
+	int in_bufferIdentifiers[] = { IN_AUDIO_DATA }; // IDEA: make sure buffer identifiers are set correctly
 	int out_bufferIdentifiers[] = { OUT_BITSTREAM_DATA };
 	int in_bufSizes[] = { pcm.nmemb * pcm.size };
 	int out_bufSizes[] = { aacinf.maxOutBufBytes };
@@ -1458,26 +1492,230 @@ static void *a2dp_source_aac(struct ba_transport *t) {
 	ba_transport_pthread_cleanup_unlock(t);
 	io.t_locked = false;
 
-	debug("Starting IO loop: %s", ba_transport_type_to_string(t->type));
+#ifdef FHG_BS_STREAM_DEBUG
+//##########################################################################################
+#if 0
+  {
+    FILE *fp;
+    size_t returnBytes;
+    int numBytes = 512;
+    uint8_t testBuffer[numBytes];
+
+    debug("RIIC BOOP 1");
+    // fp = fopen("/home/pi/Music/IOP/bs/48000_stereo__Aot-42_Vbr-4_DrcMode-1.mp4", "r");
+    fp = fopen("/media/IOP/bs/48000_stereo__Mpeg2_Aot-2_Br-128000_noLou.mp4", "r");
+    // fp = fopen("/home/pi/Documents/test.txt", "r");
+    debug("RIIC BOOP 2");
+
+    if(fp == NULL)
+    {
+      error("RIIC Error! Opened file pointer is NULL");
+      goto fail;
+    }
+    debug("RIIC BOOP 3");
+    returnBytes = fread( testBuffer, sizeof( uint8_t ), numBytes, fp );
+    debug("RIIC BOOP 4");
+    debug("RIIC BOOP 5");
+    debug("RIIC returnBytes = %u", returnBytes);
+
+    printf("RIIC The read string contains:");
+    for (int i = 0; i < returnBytes; i+=16) {
+      debug("RIIC %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x", testBuffer[i], testBuffer[i+1], testBuffer[i+2], testBuffer[i+3], testBuffer[i+4], testBuffer[i+5], testBuffer[i+6], testBuffer[i+7], testBuffer[i+8], testBuffer[i+9], testBuffer[i+10], testBuffer[i+11], testBuffer[i+12], testBuffer[i+13], testBuffer[i+14], testBuffer[i+15]);
+    }
+
+    fclose(fp);
+  }
+#endif
+
+#if 1
+  {
+    FILE *fp;
+    fp = fopen("/media/IOP/bs/48000_stereo__Mpeg2_Aot-2_Br-128000_noLou.mp4", "r");
+    debug("RIC");
+
+    if(fp == NULL)
+    {
+      error("RIC Error! Opened file pointer is NULL");
+      goto fail;
+    }
+
+    int numBytes = 512;
+    uint8_t bitstreamData[numBytes];
+
+    /* initialize RTP header and get anchor for payload */
+    rtp_header_t *rtp_header_2;
+    uint8_t *rtp_payload_2 = a2dp_init_rtp(bitstreamData, &rtp_header_2, NULL, 0);
+    uint16_t seq_number = be16toh(rtp_header_2->seq_number);
+    uint32_t timestamp = be32toh(rtp_header_2->timestamp);
+
+    size_t returnBytes;
+
+    do {
+      returnBytes = fread( bitstreamData, sizeof( uint8_t ), numBytes, fp );
+      debug("RIC returnBytes = %u", returnBytes);
+
+      if (returnBytes > 0) {
+
+				size_t payload_len_max = t->mtu_write - RTP_HEADER_LEN;
+				size_t payload_len = returnBytes;
+				rtp_header_2->timestamp = htobe32(timestamp);
+
+        debug("RIC RTP packet creation:");
+        debug("RIC     t->mtu_write = %u", t->mtu_write);
+        debug("RIC     payload_len_max = %u", payload_len_max);
+        debug("RIC     payload_len = %u", payload_len);
+
+				/* If the size of the RTP packet exceeds writing MTU, the RTP payload
+				 * should be fragmented. According to the RFC 3016, fragmentation of
+				 * the audioMuxElement requires no extra header - the payload should
+				 * be fragmented and spread across multiple RTP packets. */
+				for (;;) {
+
+					ssize_t ret;
+					size_t len;
+
+					len = payload_len > payload_len_max ? payload_len_max : payload_len;
+					rtp_header_2->markbit = payload_len <= payload_len_max;
+					rtp_header_2->seq_number = htobe16(++seq_number);
+
+					io.coutq.i = (io.coutq.i + 1) % ARRAYSIZE(io.coutq.v);
+					if ((ret = io_thread_write_bt(t->bt_fd, bitstreamData, RTP_HEADER_LEN + len, // IDEA: Maybe directly feed data from t->a2dp.pcm.fd
+									&io.coutq.v[io.coutq.i], t->a2dp.bt_fd_coutq_init)) == -1) {
+						if (errno == ECONNRESET || errno == ENOTCONN) {
+							/* exit thread upon BT socket disconnection */
+							debug("BT socket disconnected: %d", t->bt_fd);
+							goto fail;
+						}
+						error("BT socket write error: %s", strerror(errno));
+						break;
+					}
+
+					/* account written payload only */
+					ret -= RTP_HEADER_LEN;
+
+					/* break if the last part of the payload has been written */
+					if ((payload_len -= ret) == 0)
+						break;
+
+					/* move rest of data to the beginning of the payload */
+					debug("Payload fragmentation: extra %zd bytes", payload_len);
+					memmove(rtp_payload_2, rtp_payload_2 + ret, payload_len);
+				}
+			}
+
+			/* keep data transfer at a constant bit rate, also
+			 * get a timestamp for the next RTP frame */
+			// unsigned int pcm_frames = out_args.numInSamples / channels;
+			// asrsync_sync(&io.asrs, pcm_frames);
+			timestamp += 1 * 10000 / samplerate;
+
+
+    } while (returnBytes > 0);
+
+    fclose(fp);
+    goto fail;
+  }
+#endif
+//##########################################################################################
+#endif // FHG_BS_STREAM_DEBUG
+
+#ifdef FHG_BS_STREAM_DEBUG
+	debug("RIC Starting IO loop: %s", ba_transport_type_to_string(t->type));
+	if (config.a2dp.skip_encoding == true) {
+		debug("RIC Skipping the encoding step");
+	} else if (config.a2dp.skip_encoding == false) {
+		debug("RIC Doing the encoding step");
+	} else {
+		debug("RIC config.a2dp.skip_encoding not available");
+	}
+
+	int loopCounter1 = 0;
+#endif // FHG_BS_STREAM_DEBUG
+
 	for (;;) {
+#ifdef FHG_BS_STREAM_DEBUG
+		int loopCounter2 = 0;
+
+		if (loopCounter1 < 10) {
+			debug("RIC ########## for (;;) #%d", loopCounter1);
+		}
+		loopCounter1++;
+
+		// IDEA: print read samples of AAC bitstream into file and compare with orig bitstream
+		// IDEA: bt.data should contain the final data tor transmit
+#endif // FHG_BS_STREAM_DEBUG
 
 		ssize_t samples;
-		if ((samples = a2dp_poll_and_read_pcm(&t->a2dp.pcm, &io, &pcm)) <= 0) {
+		if ((samples = a2dp_poll_and_read_pcm(&t->a2dp.pcm, &io, &pcm)) <= 0) { // IDEA: use &bt instead of &pcm here, to write directly to the out buffer
 			if (samples == -1)
 				error("PCM poll and read error: %s", strerror(errno));
 			goto fail;
 		}
 
+#ifdef FHG_BS_STREAM_DEBUG
+		if (loopCounter1 < 10) {
+			debug("RIC num samples = %d (after a2dp_poll_and_read_pcm)", samples);
+			debug("RIC initial ffb_len_out(&pcm) = %u (after a2dp_poll_and_read_pcm)", ffb_len_out(&pcm));
+		}
+#endif
+
 		while ((in_args.numInSamples = ffb_len_out(&pcm)) > 0) {
+
+#ifdef FHG_BS_STREAM_DEBUG
+			if (loopCounter1 < 10) {
+				debug("RIC ##### while ((in_args.numInSamples = ffb_len_out(&pcm)) > 0) #%d", loopCounter2);
+			}
+			loopCounter2++;
+#endif
 
 			if ((err = aacEncEncode(handle, &in_buf, &out_buf, &in_args, &out_args)) != AACENC_OK)
 				error("AAC encoding error: %s", aacenc_strerror(err));
 
+#ifdef FHG_BS_STREAM_DEBUG
+			if (loopCounter1 < 10) {
+				debug("RIC   Input buffer:");
+				debug("RIC       in_buf.bufferIdentifiers[0] = %d", in_buf.bufferIdentifiers[0]);
+				debug("RIC       input buffer total sizes:");
+				debug("RIC           pcm.nmemb * pcm.size = %d", pcm.nmemb * pcm.size);
+				debug("RIC           in_bufSizes[0]       = %d", in_bufSizes[0]);
+				debug("RIC           in_buf.bufSizes[0]   = %d", in_buf.bufSizes[0]);
+				debug("RIC       input buffer element sizes:");
+				debug("RIC           pcm.size             = %d", pcm.size);
+				debug("RIC           in_bufElSizes[0]     = %d", in_bufElSizes[0]);
+				debug("RIC           in_buf.bufElSizes[0] = %d", in_buf.bufElSizes[0]);
+
+				debug("RIC   Output buffer:");
+				debug("RIC       out_buf.bufferIdentifiers[0] = %d", out_buf.bufferIdentifiers[0]);
+				debug("RIC       input buffer total sizes:");
+				debug("RIC           aacinf.maxOutBufBytes = %d", aacinf.maxOutBufBytes);
+				debug("RIC           out_bufSizes[0]       = %d", out_bufSizes[0]);
+				debug("RIC           out_buf.bufSizes[0]   = %d", out_buf.bufSizes[0]);
+				debug("RIC       output buffer element sizes:");
+				debug("RIC           bt.size               = %d", bt.size);
+				debug("RIC           out_bufElSizes[0]     = %d", out_bufElSizes[0]);
+				debug("RIC           out_buf.bufElSizes[0] = %d", out_buf.bufElSizes[0]);
+				
+				debug("RIC   Encoder input/output arguments:");
+				debug("RIC       in_args.numInSamples  = %d", in_args.numInSamples);
+				debug("RIC       out_args.numInSamples = %d", out_args.numInSamples);
+				debug("RIC       out_args.numOutBytes  = %d", out_args.numOutBytes);
+			}
+#endif // FHG_BS_STREAM_DEBUG
+			
 			if (out_args.numOutBytes > 0) {
 
 				size_t payload_len_max = t->mtu_write - RTP_HEADER_LEN;
-				size_t payload_len = out_args.numOutBytes;
+				size_t payload_len = out_args.numOutBytes; // IDEA: set out_args.numOutBytes to total bitstream size
 				rtp_header->timestamp = htobe32(timestamp);
+
+#ifdef FHG_BS_STREAM_DEBUG
+				if (loopCounter1 < 10) {
+					debug("RIC   RTP packet creation:");
+					debug("RIC       t->mtu_write = %u", t->mtu_write);
+					debug("RIC       payload_len_max = %u", payload_len_max);
+					debug("RIC       payload_len = %u", payload_len);
+				}
+#endif
 
 				/* If the size of the RTP packet exceeds writing MTU, the RTP payload
 				 * should be fragmented. According to the RFC 3016, fragmentation of
@@ -1493,7 +1731,7 @@ static void *a2dp_source_aac(struct ba_transport *t) {
 					rtp_header->seq_number = htobe16(++seq_number);
 
 					io.coutq.i = (io.coutq.i + 1) % ARRAYSIZE(io.coutq.v);
-					if ((ret = io_thread_write_bt(t->bt_fd, bt.data, RTP_HEADER_LEN + len,
+					if ((ret = io_thread_write_bt(t->bt_fd, bt.data, RTP_HEADER_LEN + len, // IDEA: Maybe directly feed data from t->a2dp.pcm.fd
 									&io.coutq.v[io.coutq.i], t->a2dp.bt_fd_coutq_init)) == -1) {
 						if (errno == ECONNRESET || errno == ENOTCONN) {
 							/* exit thread upon BT socket disconnection */
