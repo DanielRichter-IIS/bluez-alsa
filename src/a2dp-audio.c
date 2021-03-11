@@ -1240,7 +1240,10 @@ static void *a2dp_sink_aac(struct ba_transport *t) {
 			goto fail;
 		}
 
+		debug("RIIC Boop 1");
+
 		if (t->a2dp.pcm.fd == -1) {
+			debug("RIIC Boop 111");
 			seq_number = -1;
 			continue;
 		}
@@ -1282,8 +1285,12 @@ static void *a2dp_sink_aac(struct ba_transport *t) {
 			ffb_seek(&latm, prev_len);
 		}
 
+		debug("RIIC Boop 2");
+
 		memcpy(latm.tail, rtp_latm, rtp_latm_len);
 		ffb_seek(&latm, rtp_latm_len);
+
+		debug("RIIC Boop 3");
 
 		if (markbit_quirk != 1 && !rtp_header->markbit) {
 			debug("Fragmented RTP packet [%u]: LATM len: %zd", seq_number, rtp_latm_len);
@@ -1294,6 +1301,39 @@ static void *a2dp_sink_aac(struct ba_transport *t) {
 		unsigned int valid = ffb_len_out(&latm);
 		CStreamInfo *aacinf;
 
+		debug("RIIC Boop 4");
+
+
+#if 0
+		// IDEA: Print decoder input bytes
+		// IDEA: Check input chunk size
+		// IDEA: Check what the aacDecoder expects in terms of input data size
+		err = aacDecoder_Fill(handle, (uint8_t **)&latm.data, &data_len, &valid);
+		debug("RIIC Boop 41");
+
+		if (err == AAC_DEC_OK) {
+			debug("RIIC Boop 42");
+			err = aacDecoder_DecodeFrame(handle, pcm.tail, ffb_blen_in(&pcm), 0);
+		} else {
+			error("AAC buffer fill error: %s", aacdec_strerror(err));
+		}
+		debug("RIIC Boop 43");
+		if (err == AAC_DEC_OK) {
+			debug("RIIC Boop 44");
+			aacinf = aacDecoder_GetStreamInfo(handle);
+		} else {
+			error("AAC decode frame error: %s", aacdec_strerror(err));
+		}
+		debug("RIIC Boop 45");
+		if (err == AAC_DEC_OK && aacinf != NULL) {
+			debug("RIIC Boop 46");
+			const size_t samples = aacinf->frameSize * aacinf->numChannels;
+			if (ba_transport_pcm_write(&t->a2dp.pcm, pcm.data, samples) == -1)
+				error("FIFO write error: %s", strerror(errno));
+		} else {
+			error("Couldn't get AAC stream info");
+		}
+#else
 		if ((err = aacDecoder_Fill(handle, (uint8_t **)&latm.data, &data_len, &valid)) != AAC_DEC_OK)
 			error("AAC buffer fill error: %s", aacdec_strerror(err));
 		else if ((err = aacDecoder_DecodeFrame(handle, pcm.tail, ffb_blen_in(&pcm), 0)) != AAC_DEC_OK)
@@ -1305,6 +1345,9 @@ static void *a2dp_sink_aac(struct ba_transport *t) {
 			if (ba_transport_pcm_write(&t->a2dp.pcm, pcm.data, samples) == -1)
 				error("FIFO write error: %s", strerror(errno));
 		}
+#endif
+
+		debug("RIIC Boop 5");
 
 		/* make room for new LATM frame */
 		ffb_rewind(&latm);
@@ -1312,15 +1355,19 @@ static void *a2dp_sink_aac(struct ba_transport *t) {
 	}
 
 fail:
+	debug("RIIC Boop 6");
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 	pthread_cleanup_pop(!io.t_locked);
 fail_ffb:
+	debug("RIIC Boop 7");
 	pthread_cleanup_pop(1);
 	pthread_cleanup_pop(1);
 	pthread_cleanup_pop(1);
 fail_init:
+	debug("RIIC Boop 8");
 	pthread_cleanup_pop(1);
 fail_open:
+	debug("RIIC Boop 9");
 	pthread_cleanup_pop(1);
 	return NULL;
 }
